@@ -1,0 +1,16 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="grad3" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="40%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0D0D0D;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="#0D0D0D" />
+  <!-- Central Focus / Target -->
+  <circle cx="512" cy="512" r="250" stroke="#FFD700" stroke-width="60" fill="none" />
+  <circle cx="512" cy="512" r="100" fill="#FFD700" />
+  <line x1="512" y1="100" x2="512" y2="200" stroke="#FFD700" stroke-width="40" stroke-linecap="round"/>
+  <line x1="512" y1="824" x2="512" y2="924" stroke="#FFD700" stroke-width="40" stroke-linecap="round"/>
+  <line x1="100" y1="512" x2="200" y2="512" stroke="#FFD700" stroke-width="40" stroke-linecap="round"/>
+  <line x1="824" y1="512" x2="924" y2="512" stroke="#FFD700" stroke-width="40" stroke-linecap="round"/>
+</svg>

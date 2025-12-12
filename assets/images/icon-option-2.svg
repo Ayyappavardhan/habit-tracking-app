@@ -1,0 +1,13 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#B8860B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="#0D0D0D" />
+  <!-- Rising Bar Graph / Steps -->
+  <rect x="200" y="600" width="150" height="200" rx="20" fill="url(#grad2)" opacity="0.6"/>
+  <rect x="437" y="400" width="150" height="400" rx="20" fill="url(#grad2)" opacity="0.8"/>
+  <rect x="674" y="200" width="150" height="600" rx="20" fill="url(#grad2)" />
+</svg>

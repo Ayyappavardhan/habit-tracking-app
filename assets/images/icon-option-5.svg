@@ -1,0 +1,15 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad5" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFEC8B;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="#0D0D0D" />
+  <!-- Infinity Loop / Consistency -->
+  <path d="M300 512 Q300 312 512 312 T724 512 T936 512 Q936 712 724 712 T512 512 T300 512 T88 512 Q88 312 300 312" 
+        stroke="url(#grad5)" 
+        stroke-width="80" 
+        fill="none" 
+        stroke-linecap="round" />
+</svg>

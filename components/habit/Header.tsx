@@ -5,8 +5,8 @@
 
 import { BorderRadius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import { CalendarBlank, GearSix } from 'phosphor-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -50,13 +50,13 @@ export default function Header({
                     style={[styles.iconButton, { backgroundColor: colors.backgroundSecondary }]}
                     onPress={onCalendarPress}
                 >
-                    <Ionicons name="calendar-outline" size={22} color={colors.text} />
+                    <CalendarBlank size={22} color={colors.text} weight="regular" />
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[styles.iconButton, { backgroundColor: colors.backgroundSecondary }]}
                     onPress={onSettingsPress}
                 >
-                    <Ionicons name="settings-outline" size={22} color={colors.text} />
+                    <GearSix size={22} color={colors.text} weight="regular" />
                 </TouchableOpacity>
             </View>
         </View>

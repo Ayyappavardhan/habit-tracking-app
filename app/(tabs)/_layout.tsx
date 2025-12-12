@@ -5,8 +5,8 @@
 
 import { HapticTab } from '@/components/haptic-tab';
 import { useTheme } from '@/context/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
+import { ChartBar, House, Plus } from 'phosphor-react-native';
 import React from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 
@@ -39,10 +39,10 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? 'home' : 'home-outline'}
+            <House
               size={24}
               color={color}
+              weight={focused ? 'fill' : 'regular'}
             />
           ),
         }}
@@ -54,7 +54,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.addButtonWrapper, { backgroundColor: colors.tabBar }]}>
               <View style={[styles.addButton, { backgroundColor: colors.accent, shadowColor: colors.accent }]}>
-                <Ionicons name="add" size={32} color={colors.background} />
+                <Plus size={32} color={colors.background} weight="bold" />
               </View>
             </View>
           ),
@@ -66,10 +66,10 @@ export default function TabLayout() {
         options={{
           title: 'Analytics',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? 'bar-chart' : 'bar-chart-outline'}
+            <ChartBar
               size={24}
               color={color}
+              weight={focused ? 'fill' : 'regular'}
             />
           ),
         }}

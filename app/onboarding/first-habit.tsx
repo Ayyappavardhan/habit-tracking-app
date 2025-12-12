@@ -7,8 +7,8 @@ import { BorderRadius, Spacing } from '@/constants/theme';
 import { useHabits } from '@/context/HabitContext';
 import { useSettings } from '@/context/SettingsContext';
 import { useTheme } from '@/context/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { ArrowLeft, CheckCircle } from 'phosphor-react-native';
 import React, { useState } from 'react';
 import {
     KeyboardAvoidingView,
@@ -77,7 +77,7 @@ export default function FirstHabitScreen() {
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     <View style={styles.header}>
                         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                            <Ionicons name="arrow-back" size={24} color={colors.text} />
+                            <ArrowLeft size={24} color={colors.text} weight="regular" />
                         </TouchableOpacity>
                     </View>
 
@@ -154,7 +154,7 @@ export default function FirstHabitScreen() {
                         <Text style={[styles.buttonText, { color: colors.background }]}>
                             Start Tracking
                         </Text>
-                        <Ionicons name="checkmark-circle" size={20} color={colors.background} />
+                        <CheckCircle size={20} color={colors.background} weight="fill" />
                     </TouchableOpacity>
                 </View>
             </KeyboardAvoidingView>

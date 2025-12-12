@@ -5,8 +5,8 @@
 
 import { BorderRadius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { ArrowLeft, ArrowRight, ChartLineUp, Flame, TrendUp } from 'phosphor-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,13 +18,13 @@ export default function FeaturesScreen() {
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
+                    <ArrowLeft size={24} color={colors.text} weight="regular" />
                 </TouchableOpacity>
             </View>
 
             <View style={styles.content}>
                 <View style={[styles.iconContainer, { backgroundColor: colors.accent + '20' }]}>
-                    <Ionicons name="trending-up" size={64} color={colors.accent} />
+                    <TrendUp size={64} color={colors.accent} weight="regular" />
                 </View>
 
                 <Text style={[styles.title, { color: colors.text }]}>
@@ -37,11 +37,11 @@ export default function FeaturesScreen() {
 
                 <View style={styles.featureList}>
                     <View style={styles.featureItem}>
-                        <Ionicons name="flame" size={24} color="#FF9500" />
+                        <Flame size={24} color="#FF9500" weight="fill" />
                         <Text style={[styles.featureText, { color: colors.text }]}>Track streaks</Text>
                     </View>
                     <View style={styles.featureItem}>
-                        <Ionicons name="stats-chart" size={24} color="#34C759" />
+                        <ChartLineUp size={24} color="#34C759" weight="regular" />
                         <Text style={[styles.featureText, { color: colors.text }]}>View analytics</Text>
                     </View>
                 </View>
@@ -55,7 +55,7 @@ export default function FeaturesScreen() {
                     <Text style={[styles.buttonText, { color: colors.background }]}>
                         Next
                     </Text>
-                    <Ionicons name="arrow-forward" size={20} color={colors.background} />
+                    <ArrowRight size={20} color={colors.background} weight="regular" />
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

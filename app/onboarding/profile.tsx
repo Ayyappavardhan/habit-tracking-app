@@ -7,8 +7,8 @@ import { EmojiPicker } from '@/components/habit';
 import { BorderRadius, Colors, Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/SettingsContext';
 import { useTheme } from '@/context/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { ArrowLeft, ArrowRight, CheckCircle, PencilSimple } from 'phosphor-react-native';
 import React, { useState } from 'react';
 import {
     Image,
@@ -67,7 +67,7 @@ export default function ProfileScreen() {
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     <View style={styles.header}>
                         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                            <Ionicons name="arrow-back" size={24} color={colors.text} />
+                            <ArrowLeft size={24} color={colors.text} weight="regular" />
                         </TouchableOpacity>
                     </View>
 
@@ -86,7 +86,7 @@ export default function ProfileScreen() {
                         >
                             {renderAvatar()}
                             <View style={[styles.editBadge, { backgroundColor: colors.accent }]}>
-                                <Ionicons name="pencil" size={16} color={colors.background} />
+                                <PencilSimple size={16} color={colors.background} weight="bold" />
                             </View>
                         </TouchableOpacity>
 
@@ -122,7 +122,7 @@ export default function ProfileScreen() {
                         <Text style={[styles.buttonText, { color: colors.background }]}>
                             Continue
                         </Text>
-                        <Ionicons name="arrow-forward" size={20} color={colors.background} />
+                        <ArrowRight size={20} color={colors.background} weight="regular" />
                     </TouchableOpacity>
                 </View>
 
@@ -155,7 +155,7 @@ export default function ProfileScreen() {
                                     <Text style={[styles.avatarOptionLabel, { color: colors.text }]}>Male</Text>
                                     {avatar === 'avatar-male' && (
                                         <View style={[styles.selectedBadge, { backgroundColor: colors.accent }]}>
-                                            <Ionicons name="checkmark" size={12} color="#FFF" />
+                                            <CheckCircle size={12} color="#FFF" weight="fill" />
                                         </View>
                                     )}
                                 </TouchableOpacity>
@@ -173,7 +173,7 @@ export default function ProfileScreen() {
                                     <Text style={[styles.avatarOptionLabel, { color: colors.text }]}>Female</Text>
                                     {avatar === 'avatar-female' && (
                                         <View style={[styles.selectedBadge, { backgroundColor: colors.accent }]}>
-                                            <Ionicons name="checkmark" size={12} color="#FFF" />
+                                            <CheckCircle size={12} color="#FFF" weight="fill" />
                                         </View>
                                     )}
                                 </TouchableOpacity>

@@ -4,11 +4,16 @@
  */
 
 import {
+    BestTimeAnalysis,
     CircularProgress,
     HabitFilter,
+    HabitPerformanceCard,
+    InsightsCard,
+    MonthlyHeatmap,
     MoodTrendChart,
     PeriodSelector,
     StreakCard,
+    TotalStatsRow,
     WeeklyActivityChart
 } from '@/components/analytics';
 import { Colors, Spacing } from '@/constants/theme';
@@ -16,8 +21,13 @@ import { useHabits } from '@/context/HabitContext';
 import { useTheme } from '@/context/ThemeContext';
 import {
     calculateCompletionRate,
+    generateInsights,
+    getBestDaysAnalysis,
+    getHabitPerformanceData,
+    getMonthlyHeatmapData,
     getPreviousPeriodComparison,
     getStreakData,
+    getTotalStats,
     getWeeklyActivityData,
     PeriodType,
 } from '@/utils/analyticsUtils';
@@ -55,6 +65,32 @@ export default function AnalyticsScreen() {
         [habits, selectedHabitId]
     );
 
+    // NEW: Premium analytics data
+    const totalStats = useMemo(
+        () => getTotalStats(habits),
+        [habits]
+    );
+
+    const bestDaysData = useMemo(
+        () => getBestDaysAnalysis(habits),
+        [habits]
+    );
+
+    const habitPerformanceData = useMemo(
+        () => getHabitPerformanceData(habits, selectedPeriod),
+        [habits, selectedPeriod]
+    );
+
+    const heatmapData = useMemo(
+        () => getMonthlyHeatmapData(habits),
+        [habits]
+    );
+
+    const insights = useMemo(
+        () => generateInsights(habits),
+        [habits]
+    );
+
     // Generate trend message
     const getTrendMessage = () => {
         if (comparison.trend === 'up') {
@@ -65,7 +101,13 @@ export default function AnalyticsScreen() {
         return `Same as last ${selectedPeriod}`;
     };
 
-
+    const getPeriodLabel = () => {
+        switch (selectedPeriod) {
+            case 'week': return 'week';
+            case 'month': return 'month';
+            case 'year': return 'year';
+        }
+    };
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
@@ -106,7 +148,7 @@ export default function AnalyticsScreen() {
                     />
                 </View>
 
-                {/* Completion Rate Card */}
+                {/* Completion Rate Card - Hero/Main KPI */}
                 <View style={styles.section}>
                     <CircularProgress
                         percentage={completionRate}
@@ -114,19 +156,58 @@ export default function AnalyticsScreen() {
                     />
                 </View>
 
-                {/* Streak Cards */}
+                {/* Streak Cards - Motivation/Engagement */}
                 <View style={styles.streakRow}>
                     <StreakCard type="current" value={streakData.current} />
                     <StreakCard type="best" value={streakData.best} />
                 </View>
 
-                {/* Weekly Activity */}
+                {/* Weekly Activity - Current Week Pattern */}
                 <View style={styles.section}>
                     <WeeklyActivityChart data={weeklyData} />
                 </View>
 
-                {/* Recent Mood Flow */}
+                {/* Monthly Heatmap - Big Picture Overview */}
+                {heatmapData.length > 0 && (
+                    <View style={styles.section}>
+                        <MonthlyHeatmap data={heatmapData} />
+                    </View>
+                )}
+
+                {/* Total Stats Row - Quick Numbers Summary */}
+                <View style={styles.section}>
+                    <TotalStatsRow
+                        totalHabits={totalStats.totalHabits}
+                        totalCompletions={totalStats.totalCompletions}
+                        perfectDays={totalStats.perfectDays}
+                        avgDailyCompletion={totalStats.avgDailyCompletion}
+                    />
+                </View>
+
+                {/* Habit Performance Card - Detailed Breakdown */}
+                {habitPerformanceData.length > 0 && (
+                    <View style={styles.section}>
+                        <HabitPerformanceCard
+                            data={habitPerformanceData}
+                            period={getPeriodLabel()}
+                        />
+                    </View>
+                )}
+
+                {/* Best Time Analysis - Day Patterns */}
+                <View style={styles.section}>
+                    <BestTimeAnalysis data={bestDaysData} />
+                </View>
+
+                {/* Mood Trend Chart */}
                 <MoodTrendChart period={selectedPeriod} />
+
+                {/* Insights Card - Actionable Tips */}
+                {insights.length > 0 && (
+                    <View style={styles.section}>
+                        <InsightsCard insights={insights} />
+                    </View>
+                )}
 
                 {/* Empty State */}
                 {habits.length === 0 && (

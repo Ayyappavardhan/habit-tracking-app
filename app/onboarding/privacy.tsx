@@ -5,8 +5,8 @@
 
 import { BorderRadius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { ArrowLeft, ArrowRight, DeviceMobile, ShieldCheck, UserMinus } from 'phosphor-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,13 +18,13 @@ export default function PrivacyScreen() {
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
+                    <ArrowLeft size={24} color={colors.text} weight="regular" />
                 </TouchableOpacity>
             </View>
 
             <View style={styles.content}>
                 <View style={[styles.iconContainer, { backgroundColor: colors.accent + '20' }]}>
-                    <Ionicons name="shield-checkmark" size={64} color={colors.accent} />
+                    <ShieldCheck size={64} color={colors.accent} weight="regular" />
                 </View>
 
                 <Text style={[styles.title, { color: colors.text }]}>
@@ -37,7 +37,7 @@ export default function PrivacyScreen() {
 
                 <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
                     <View style={styles.infoItem}>
-                        <Ionicons name="phone-portrait-outline" size={24} color={colors.text} />
+                        <DeviceMobile size={24} color={colors.text} weight="regular" />
                         <View style={styles.infoTextContainer}>
                             <Text style={[styles.infoTitle, { color: colors.text }]}>Local Storage Only</Text>
                             <Text style={[styles.infoDesc, { color: colors.textMuted }]}>
@@ -49,7 +49,7 @@ export default function PrivacyScreen() {
                     <View style={[styles.divider, { backgroundColor: colors.cardBorder }]} />
 
                     <View style={styles.infoItem}>
-                        <Ionicons name="person-remove-outline" size={24} color={colors.text} />
+                        <UserMinus size={24} color={colors.text} weight="regular" />
                         <View style={styles.infoTextContainer}>
                             <Text style={[styles.infoTitle, { color: colors.text }]}>No Account Needed</Text>
                             <Text style={[styles.infoDesc, { color: colors.textMuted }]}>
@@ -68,7 +68,7 @@ export default function PrivacyScreen() {
                     <Text style={[styles.buttonText, { color: colors.background }]}>
                         Next
                     </Text>
-                    <Ionicons name="arrow-forward" size={20} color={colors.background} />
+                    <ArrowRight size={20} color={colors.background} weight="regular" />
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

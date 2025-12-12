@@ -10,10 +10,10 @@ import { useNotes } from '@/context/NoteContext';
 import { useSettings } from '@/context/SettingsContext';
 import { useTheme } from '@/context/ThemeContext';
 import * as habitStorage from '@/services/habitStorage';
-import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import { router } from 'expo-router';
 import * as Sharing from 'expo-sharing';
+import { Bell, CalendarBlank, CaretLeft, CaretRight, CheckCircle, Clock, DownloadSimple, Info, Moon, Palette, Sun, Trash, X } from 'phosphor-react-native';
 import React, { useState } from 'react';
 import {
     Alert,
@@ -154,7 +154,7 @@ export default function SettingsScreen() {
                     style={[styles.backButton, { backgroundColor: colors.backgroundSecondary }]}
                     onPress={() => router.back()}
                 >
-                    <Ionicons name="chevron-back" size={24} color={colors.text} />
+                    <CaretLeft size={24} color={colors.text} weight="regular" />
                 </TouchableOpacity>
                 <Text style={[styles.headerTitle, { color: colors.text }]}>Settings</Text>
                 <View style={styles.headerSpacer} />
@@ -179,7 +179,7 @@ export default function SettingsScreen() {
                                     <Text style={[styles.rowHint, { color: colors.textMuted }]}>Tap to change</Text>
                                 </View>
                             </View>
-                            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+                            <CaretRight size={20} color={colors.textSecondary} weight="regular" />
                         </TouchableOpacity>
 
                         <View style={[styles.divider, { backgroundColor: colors.cardBorder }]} />
@@ -206,7 +206,7 @@ export default function SettingsScreen() {
                         <View style={styles.row}>
                             <View style={styles.rowLeft}>
                                 <View style={[styles.iconContainer, { backgroundColor: '#5856D6' + '20' }]} >
-                                    <Ionicons name="color-palette" size={20} color="#5856D6" />
+                                    <Palette size={20} color="#5856D6" weight="regular" />
                                 </View>
                                 <Text style={[styles.rowLabel, { color: colors.text }]}>Theme</Text>
                             </View>
@@ -218,10 +218,10 @@ export default function SettingsScreen() {
                                     ]}
                                     onPress={() => updateSettings({ theme: 'dark' })}
                                 >
-                                    <Ionicons
-                                        name="moon"
+                                    <Moon
                                         size={16}
                                         color={settings.theme === 'dark' ? colors.background : colors.textSecondary}
+                                        weight="fill"
                                     />
                                     <Text
                                         style={[
@@ -240,10 +240,10 @@ export default function SettingsScreen() {
                                     ]}
                                     onPress={() => updateSettings({ theme: 'light' })}
                                 >
-                                    <Ionicons
-                                        name="sunny"
+                                    <Sun
                                         size={16}
                                         color={settings.theme === 'light' ? colors.background : colors.textSecondary}
+                                        weight="fill"
                                     />
                                     <Text
                                         style={[
@@ -268,7 +268,7 @@ export default function SettingsScreen() {
                         <View style={styles.switchRow}>
                             <View style={styles.rowLeft}>
                                 <View style={[styles.iconContainer, { backgroundColor: colors.accent + '20' }]}>
-                                    <Ionicons name="notifications" size={20} color={colors.accent} />
+                                    <Bell size={20} color={colors.accent} weight="fill" />
                                 </View>
                                 <Text style={[styles.rowLabel, { color: colors.text }]}>Enable Notifications</Text>
                             </View>
@@ -289,7 +289,7 @@ export default function SettingsScreen() {
                         >
                             <View style={styles.rowLeft}>
                                 <View style={[styles.iconContainer, { backgroundColor: '#5856D6' + '20' }]}>
-                                    <Ionicons name="time" size={20} color="#5856D6" />
+                                    <Clock size={20} color="#5856D6" weight="regular" />
                                 </View>
                                 <Text style={[styles.rowLabel, { color: colors.text }]}>Default Reminder Time</Text>
                             </View>
@@ -297,7 +297,7 @@ export default function SettingsScreen() {
                                 <Text style={[styles.rowValue, { color: colors.textSecondary }]}>
                                     {formatTime(settings.defaultNotificationTime)}
                                 </Text>
-                                <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+                                <CaretRight size={20} color={colors.textSecondary} weight="regular" />
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -310,7 +310,7 @@ export default function SettingsScreen() {
                         <View style={styles.row}>
                             <View style={styles.rowLeft}>
                                 <View style={[styles.iconContainer, { backgroundColor: '#34C759' + '20' }]}>
-                                    <Ionicons name="calendar" size={20} color="#34C759" />
+                                    <CalendarBlank size={20} color="#34C759" weight="regular" />
                                 </View>
                                 <Text style={[styles.rowLabel, { color: colors.text }]}>Week Starts On</Text>
                             </View>
@@ -361,11 +361,11 @@ export default function SettingsScreen() {
                         <TouchableOpacity style={styles.row} onPress={handleExportData}>
                             <View style={styles.rowLeft}>
                                 <View style={[styles.iconContainer, { backgroundColor: '#007AFF' + '20' }]}>
-                                    <Ionicons name="download-outline" size={20} color="#007AFF" />
+                                    <DownloadSimple size={20} color="#007AFF" weight="regular" />
                                 </View>
                                 <Text style={[styles.rowLabel, { color: colors.text }]}>Export Habits</Text>
                             </View>
-                            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+                            <CaretRight size={20} color={colors.textSecondary} weight="regular" />
                         </TouchableOpacity>
 
                         <View style={[styles.divider, { backgroundColor: colors.cardBorder }]} />
@@ -373,13 +373,13 @@ export default function SettingsScreen() {
                         <TouchableOpacity style={styles.row} onPress={handleClearData}>
                             <View style={styles.rowLeft}>
                                 <View style={[styles.iconContainer, { backgroundColor: Colors.error + '20' }]}>
-                                    <Ionicons name="trash-outline" size={20} color={Colors.error} />
+                                    <Trash size={20} color={Colors.error} weight="regular" />
                                 </View>
                                 <Text style={[styles.rowLabel, { color: Colors.error }]}>
                                     Clear All Data
                                 </Text>
                             </View>
-                            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+                            <CaretRight size={20} color={colors.textSecondary} weight="regular" />
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -391,7 +391,7 @@ export default function SettingsScreen() {
                         <View style={styles.row}>
                             <View style={styles.rowLeft}>
                                 <View style={[styles.iconContainer, { backgroundColor: colors.accent + '20' }]}>
-                                    <Ionicons name="information-circle" size={20} color={colors.accent} />
+                                    <Info size={20} color={colors.accent} weight="fill" />
                                 </View>
                                 <Text style={[styles.rowLabel, { color: colors.text }]}>Version</Text>
                             </View>
@@ -433,7 +433,7 @@ export default function SettingsScreen() {
                                 <Text style={[styles.avatarOptionLabel, { color: colors.text }]}>Male</Text>
                                 {settings.userAvatar === 'avatar-male' && (
                                     <View style={[styles.selectedBadge, { backgroundColor: colors.accent }]}>
-                                        <Ionicons name="checkmark" size={12} color="#FFF" />
+                                        <CheckCircle size={12} color="#FFF" weight="fill" />
                                     </View>
                                 )}
                             </TouchableOpacity>
@@ -451,7 +451,7 @@ export default function SettingsScreen() {
                                 <Text style={[styles.avatarOptionLabel, { color: colors.text }]}>Female</Text>
                                 {settings.userAvatar === 'avatar-female' && (
                                     <View style={[styles.selectedBadge, { backgroundColor: colors.accent }]}>
-                                        <Ionicons name="checkmark" size={12} color="#FFF" />
+                                        <CheckCircle size={12} color="#FFF" weight="fill" />
                                     </View>
                                 )}
                             </TouchableOpacity>
@@ -508,7 +508,7 @@ export default function SettingsScreen() {
                         <View style={[styles.timePickerHeader, { borderBottomColor: colors.cardBorder }]}>
                             <Text style={[styles.timePickerTitle, { color: colors.text }]}>Select Time</Text>
                             <TouchableOpacity onPress={() => setShowTimePicker(false)}>
-                                <Ionicons name="close" size={24} color={colors.text} />
+                                <X size={24} color={colors.text} weight="regular" />
                             </TouchableOpacity>
                         </View>
                         <ScrollView style={styles.timePickerScroll} showsVerticalScrollIndicator={false}>
@@ -532,7 +532,7 @@ export default function SettingsScreen() {
                                         {formatTime(time)}
                                     </Text>
                                     {settings.defaultNotificationTime === time && (
-                                        <Ionicons name="checkmark" size={20} color={colors.background} />
+                                        <CheckCircle size={20} color={colors.background} weight="fill" />
                                     )}
                                 </TouchableOpacity>
                             ))}

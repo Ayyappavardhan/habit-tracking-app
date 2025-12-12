@@ -9,8 +9,8 @@ import { useTheme } from '@/context/ThemeContext';
 import { Habit } from '@/types/habit';
 import { formatLocalDate } from '@/utils/dateUtils';
 import haptics from '@/utils/haptics';
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { Camera, CheckCircle, FileText, GearSix } from 'phosphor-react-native';
 import React, { useCallback } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ContributionGrid from './ContributionGrid';
@@ -81,7 +81,7 @@ export default function HabitCard({
                     style={[styles.editButton, { backgroundColor: colors.backgroundSecondary }]}
                     onPress={handleEditHabit}
                 >
-                    <Ionicons name="settings-outline" size={20} color={colors.textSecondary} />
+                    <GearSix size={20} color={colors.textSecondary} weight="regular" />
                 </TouchableOpacity>
             </View>
 
@@ -101,15 +101,15 @@ export default function HabitCard({
             {/* Action Buttons */}
             <View style={[styles.actions, { borderTopColor: colors.cardBorder }]}>
                 <TouchableOpacity style={[styles.doneButton, { backgroundColor: colors.accent }]} onPress={handleDone}>
-                    <Ionicons name="checkmark-circle" size={18} color={colors.background} />
+                    <CheckCircle size={18} color={colors.background} weight="fill" />
                     <Text style={[styles.doneButtonText, { color: colors.background }]}>Done</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={[styles.secondaryButton, { backgroundColor: colors.backgroundSecondary, borderColor: colors.accent }]} onPress={handleAddNote}>
-                    <Ionicons
-                        name={hasTodayNote ? "document-text" : "document-text-outline"}
+                    <FileText
                         size={18}
                         color={colors.accent}
+                        weight={hasTodayNote ? "fill" : "regular"}
                     />
                     <Text style={[styles.secondaryButtonText, { color: colors.accent }]}>
                         {hasTodayNote ? 'View Note' : 'Add Note'}
@@ -117,7 +117,7 @@ export default function HabitCard({
                 </TouchableOpacity>
 
                 <TouchableOpacity style={[styles.iconButton, { backgroundColor: colors.backgroundSecondary }]} onPress={handleAddPhoto}>
-                    <Ionicons name="camera-outline" size={20} color={colors.textSecondary} />
+                    <Camera size={20} color={colors.textSecondary} weight="regular" />
                 </TouchableOpacity>
             </View>
         </View>

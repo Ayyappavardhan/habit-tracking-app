@@ -392,3 +392,338 @@ export function getStreakData(
         best: calculateBestStreak(perfectDates),
     };
 }
+
+/**
+ * Get total stats for all habits
+ */
+export function getTotalStats(habits: Habit[]): {
+    totalHabits: number;
+    totalCompletions: number;
+    perfectDays: number;
+    avgDailyCompletion: number;
+} {
+    if (habits.length === 0) {
+        return { totalHabits: 0, totalCompletions: 0, perfectDays: 0, avgDailyCompletion: 0 };
+    }
+
+    const allDates = new Set<string>();
+    let totalCompletions = 0;
+
+    habits.forEach(habit => {
+        Object.keys(habit.completedDates).forEach(date => {
+            allDates.add(date);
+            totalCompletions++;
+        });
+    });
+
+    // Calculate perfect days (all habits completed)
+    let perfectDays = 0;
+    allDates.forEach(date => {
+        const allDone = habits.every(habit => habit.completedDates[date]);
+        if (allDone) perfectDays++;
+    });
+
+    // Average daily completion
+    const daysTracked = allDates.size || 1;
+    const avgDailyCompletion = Math.round((totalCompletions / daysTracked / habits.length) * 100);
+
+    return {
+        totalHabits: habits.length,
+        totalCompletions,
+        perfectDays,
+        avgDailyCompletion,
+    };
+}
+
+/**
+ * Get best days analysis (which days of week are most productive)
+ */
+export function getBestDaysAnalysis(habits: Habit[]): {
+    day: string;
+    shortDay: string;
+    completionRate: number;
+    isWeekend: boolean;
+}[] {
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const shortDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    const dayStats: { completed: number; total: number }[] = Array(7).fill(null).map(() => ({ completed: 0, total: 0 }));
+
+    if (habits.length === 0) {
+        return dayNames.map((day, i) => ({
+            day,
+            shortDay: shortDays[i],
+            completionRate: 0,
+            isWeekend: i === 0 || i === 6,
+        }));
+    }
+
+    // Analyze last 8 weeks of data
+    const today = new Date();
+    for (let i = 0; i < 56; i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = formatLocalDate(date);
+        const dayOfWeek = date.getDay();
+
+        habits.forEach(habit => {
+            dayStats[dayOfWeek].total++;
+            if (habit.completedDates[dateStr]) {
+                dayStats[dayOfWeek].completed++;
+            }
+        });
+    }
+
+    return dayNames.map((day, i) => ({
+        day,
+        shortDay: shortDays[i],
+        completionRate: dayStats[i].total > 0
+            ? Math.round((dayStats[i].completed / dayStats[i].total) * 100)
+            : 0,
+        isWeekend: i === 0 || i === 6,
+    }));
+}
+
+/**
+ * Get habit performance data (per-habit breakdown)
+ */
+export function getHabitPerformanceData(
+    habits: Habit[],
+    period: PeriodType
+): {
+    habit: Habit;
+    completionRate: number;
+    completedCount: number;
+    possibleCount: number;
+    status: 'excellent' | 'good' | 'fair' | 'poor';
+}[] {
+    const { startDate, endDate } = getDateRangeForPeriod(period);
+    const today = getTodayLocal();
+    const end = Math.min(endDate.getTime(), new Date(today + 'T23:59:59').getTime());
+    const start = startDate.getTime();
+
+    if (end < start) return [];
+
+    const daysInPeriod = Math.max(0, Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1);
+
+    return habits.map(habit => {
+        let completedCount = 0;
+        let possibleCount = 0;
+
+        Object.keys(habit.completedDates).forEach(date => {
+            if (date >= formatLocalDate(startDate) && date <= formatLocalDate(endDate) && date <= today) {
+                completedCount++;
+            }
+        });
+
+        if (habit.frequency === 'weekly') {
+            possibleCount = Math.max(1, Math.round((daysInPeriod / 7) * (habit.daysPerWeek || 1)));
+        } else {
+            possibleCount = daysInPeriod;
+        }
+
+        const completionRate = possibleCount > 0
+            ? Math.round((completedCount / possibleCount) * 100)
+            : 0;
+
+        let status: 'excellent' | 'good' | 'fair' | 'poor';
+        if (completionRate >= 80) status = 'excellent';
+        else if (completionRate >= 60) status = 'good';
+        else if (completionRate >= 40) status = 'fair';
+        else status = 'poor';
+
+        return {
+            habit,
+            completionRate: Math.min(100, completionRate),
+            completedCount,
+            possibleCount,
+            status,
+        };
+    }).sort((a, b) => b.completionRate - a.completionRate);
+}
+
+/**
+ * Get monthly heatmap data (last 35 days for calendar grid)
+ */
+export function getMonthlyHeatmapData(habits: Habit[]): {
+    date: string;
+    dayOfMonth: number;
+    completionRate: number;
+    weekIndex: number;
+    dayIndex: number;
+}[] {
+    const result: {
+        date: string;
+        dayOfMonth: number;
+        completionRate: number;
+        weekIndex: number;
+        dayIndex: number;
+    }[] = [];
+
+    if (habits.length === 0) return result;
+
+    const today = new Date();
+
+    // Get last 35 days (5 weeks)
+    for (let i = 34; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = formatLocalDate(date);
+
+        let completed = 0;
+        habits.forEach(habit => {
+            if (habit.completedDates[dateStr]) completed++;
+        });
+
+        const completionRate = Math.round((completed / habits.length) * 100);
+
+        result.push({
+            date: dateStr,
+            dayOfMonth: date.getDate(),
+            completionRate,
+            weekIndex: Math.floor((34 - i) / 7),
+            dayIndex: (34 - i) % 7,
+        });
+    }
+
+    return result;
+}
+
+/**
+ * Get daily precision (how closely user sticks to habits)
+ */
+export function getDailyPrecision(habits: Habit[], period: PeriodType): number {
+    if (habits.length === 0) return 0;
+
+    const { startDate, endDate } = getDateRangeForPeriod(period);
+    const today = getTodayLocal();
+
+    let perfectDays = 0;
+    let totalDays = 0;
+
+    const currentDate = new Date(startDate);
+    const todayDate = new Date(today + 'T12:00:00');
+
+    while (currentDate <= todayDate && currentDate <= endDate) {
+        const dateStr = formatLocalDate(currentDate);
+        totalDays++;
+
+        const allDone = habits.every(habit => habit.completedDates[dateStr]);
+        if (allDone) perfectDays++;
+
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return totalDays > 0 ? Math.round((perfectDays / totalDays) * 100) : 0;
+}
+
+/**
+ * Generate dynamic insights based on user data
+ */
+export function generateInsights(habits: Habit[]): {
+    icon: string;
+    title: string;
+    description: string;
+    type: 'success' | 'tip' | 'warning' | 'info';
+}[] {
+    const insights: {
+        icon: string;
+        title: string;
+        description: string;
+        type: 'success' | 'tip' | 'warning' | 'info';
+    }[] = [];
+
+    if (habits.length === 0) {
+        insights.push({
+            icon: '🎯',
+            title: 'Get Started',
+            description: 'Add your first habit to begin tracking your progress!',
+            type: 'info',
+        });
+        return insights;
+    }
+
+    const totalStats = getTotalStats(habits);
+    const bestDays = getBestDaysAnalysis(habits);
+    const streakData = getStreakData(habits);
+
+    // Best day insight
+    const sortedDays = [...bestDays].sort((a, b) => b.completionRate - a.completionRate);
+    const bestDay = sortedDays[0];
+    if (bestDay && bestDay.completionRate > 0) {
+        insights.push({
+            icon: '📅',
+            title: `${bestDay.day}s are your best!`,
+            description: `You complete ${bestDay.completionRate}% of habits on ${bestDay.day}s`,
+            type: 'success',
+        });
+    }
+
+    // Weekend vs Weekday comparison
+    const weekdayAvg = bestDays.filter(d => !d.isWeekend).reduce((sum, d) => sum + d.completionRate, 0) / 5;
+    const weekendAvg = bestDays.filter(d => d.isWeekend).reduce((sum, d) => sum + d.completionRate, 0) / 2;
+
+    if (weekendAvg > weekdayAvg + 10) {
+        insights.push({
+            icon: '🌴',
+            title: 'Weekend Warrior',
+            description: `You're ${Math.round(weekendAvg - weekdayAvg)}% more consistent on weekends!`,
+            type: 'tip',
+        });
+    } else if (weekdayAvg > weekendAvg + 10) {
+        insights.push({
+            icon: '💼',
+            title: 'Weekday Champion',
+            description: `You're ${Math.round(weekdayAvg - weekendAvg)}% more consistent on weekdays!`,
+            type: 'tip',
+        });
+    }
+
+    // Streak insight
+    if (streakData.current >= 7) {
+        insights.push({
+            icon: '🔥',
+            title: 'Amazing Streak!',
+            description: `You've been consistent for ${streakData.current} days straight!`,
+            type: 'success',
+        });
+    } else if (streakData.current >= 3) {
+        insights.push({
+            icon: '🌟',
+            title: 'Building Momentum',
+            description: `${streakData.current} day streak! Keep going to beat your best of ${streakData.best}!`,
+            type: 'info',
+        });
+    } else if (streakData.best > 0) {
+        insights.push({
+            icon: '💪',
+            title: 'Keep Pushing',
+            description: `Your best streak was ${streakData.best} days. You can beat it!`,
+            type: 'tip',
+        });
+    }
+
+    // Perfect days insight
+    if (totalStats.perfectDays >= 5) {
+        insights.push({
+            icon: '⭐',
+            title: 'Perfect Day Master',
+            description: `You've had ${totalStats.perfectDays} perfect days with all habits done!`,
+            type: 'success',
+        });
+    }
+
+    // Low performing habit tip
+    const habitPerf = getHabitPerformanceData(habits, 'week');
+    const lowPerformer = habitPerf.find(h => h.status === 'poor' || h.status === 'fair');
+    if (lowPerformer && lowPerformer.completionRate < 50) {
+        insights.push({
+            icon: '🎯',
+            title: `Focus on ${lowPerformer.habit.name}`,
+            description: `Only ${lowPerformer.completionRate}% this week. Try setting a reminder!`,
+            type: 'warning',
+        });
+    }
+
+    return insights.slice(0, 4); // Return max 4 insights
+}

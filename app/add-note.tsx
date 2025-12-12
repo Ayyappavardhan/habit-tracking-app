@@ -12,10 +12,10 @@ import { useTheme } from '@/context/ThemeContext';
 import * as imageStorage from '@/services/imageStorage';
 import { MoodType, NoteImage } from '@/types/note';
 import { formatLocalDate } from '@/utils/dateUtils';
-import { Ionicons } from '@expo/vector-icons';
 import * as MediaLibrary from 'expo-media-library';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { ArrowLeft, Trash } from 'phosphor-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
     Alert,
@@ -289,7 +289,7 @@ export default function AddNoteScreen() {
                         style={styles.headerButton}
                         onPress={handleBack}
                     >
-                        <Ionicons name="arrow-back" size={24} color={colors.text} />
+                        <ArrowLeft size={24} color={colors.text} weight="regular" />
                     </TouchableOpacity>
 
                     <View style={styles.headerCenter}>
@@ -306,7 +306,7 @@ export default function AddNoteScreen() {
                                 style={styles.deleteButton}
                                 onPress={handleDelete}
                             >
-                                <Ionicons name="trash-outline" size={20} color={Colors.error} />
+                                <Trash size={20} color={Colors.error} weight="regular" />
                             </TouchableOpacity>
                         )}
                     </View>

@@ -24,7 +24,12 @@ export default function WeeklyActivityChart({ data }: WeeklyActivityChartProps) 
 
     return (
         <View style={[styles.container, { backgroundColor: colors.card }]}>
-            <Text style={[styles.title, { color: colors.text }]}>Weekly Activity</Text>
+            <View style={styles.header}>
+                <Text style={[styles.title, { color: colors.text }]}>Weekly Activity</Text>
+                <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+                    Daily completion % this week
+                </Text>
+            </View>
             <View style={styles.chartContainer}>
                 {data.map((item, index) => {
                     const barHeight = (item.value / 100) * 120; // Max height 120
@@ -64,10 +69,16 @@ const styles = StyleSheet.create({
         borderRadius: BorderRadius.lg,
         padding: Spacing.lg,
     },
+    header: {
+        marginBottom: Spacing.lg,
+    },
     title: {
         fontSize: 18,
         fontWeight: '600',
-        marginBottom: Spacing.lg,
+    },
+    subtitle: {
+        fontSize: 12,
+        marginTop: 2,
     },
     chartContainer: {
         flexDirection: 'row',

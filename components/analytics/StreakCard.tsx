@@ -16,7 +16,10 @@ interface StreakCardProps {
 export default function StreakCard({ type, value }: StreakCardProps) {
     const { colors, isDark } = useTheme();
     const icon = type === 'current' ? '🔥' : '🏆';
-    const label = type === 'current' ? 'CURRENT\nSTREAK' : 'BEST STREAK';
+    const label = type === 'current' ? 'CURRENT STREAK' : 'BEST STREAK';
+    const description = type === 'current'
+        ? 'Days in a row'
+        : 'Your record';
     // Adjust icon background for theme
     const iconBgColor = isDark
         ? (type === 'current' ? '#3D2000' : '#2D2D00')
@@ -29,6 +32,7 @@ export default function StreakCard({ type, value }: StreakCardProps) {
             </View>
             <Text style={[styles.value, { color: colors.text }]}>{value}</Text>
             <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>
+            <Text style={[styles.description, { color: colors.textMuted }]}>{description}</Text>
         </View>
     );
 }
@@ -61,6 +65,9 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         letterSpacing: 0.5,
         marginTop: Spacing.xs,
-        lineHeight: 14,
+    },
+    description: {
+        fontSize: 10,
+        marginTop: 2,
     },
 });

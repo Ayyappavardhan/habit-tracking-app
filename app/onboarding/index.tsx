@@ -5,8 +5,8 @@
 
 import { BorderRadius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { ArrowRight, Lightning } from 'phosphor-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,7 +18,7 @@ export default function WelcomeScreen() {
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.content}>
                 <View style={[styles.iconContainer, { backgroundColor: colors.accent + '20' }]}>
-                    <Ionicons name="flash" size={64} color={colors.accent} />
+                    <Lightning size={64} color={colors.accent} weight="fill" />
                 </View>
 
                 <Text style={[styles.title, { color: colors.text }]}>
@@ -38,7 +38,7 @@ export default function WelcomeScreen() {
                     <Text style={[styles.buttonText, { color: colors.background }]}>
                         Get Started
                     </Text>
-                    <Ionicons name="arrow-forward" size={20} color={colors.background} />
+                    <ArrowRight size={20} color={colors.background} weight="regular" />
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

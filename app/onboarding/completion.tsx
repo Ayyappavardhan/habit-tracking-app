@@ -6,8 +6,8 @@
 import { BorderRadius, Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/SettingsContext';
 import { useTheme } from '@/context/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { Medal, Rocket, Star } from 'phosphor-react-native';
 import React, { useRef } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
@@ -41,7 +41,7 @@ export default function CompletionScreen() {
 
             <View style={styles.content}>
                 <View style={[styles.iconContainer, { backgroundColor: colors.accent + '20' }]}>
-                    <Ionicons name="ribbon" size={80} color={colors.accent} />
+                    <Medal size={80} color={colors.accent} weight="fill" />
                 </View>
 
                 <Text style={[styles.title, { color: colors.text }]}>
@@ -54,7 +54,7 @@ export default function CompletionScreen() {
                 </Text>
 
                 <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
-                    <Ionicons name="star" size={32} color="#FFD700" />
+                    <Star size={32} color="#FFD700" weight="fill" />
                     <Text style={[styles.cardText, { color: colors.text }]}>
                         "Small daily improvements are the key to staggering long-term results."
                     </Text>
@@ -69,7 +69,7 @@ export default function CompletionScreen() {
                     <Text style={[styles.buttonText, { color: colors.background }]}>
                         Let's Go!
                     </Text>
-                    <Ionicons name="rocket-outline" size={20} color={colors.background} />
+                    <Rocket size={20} color={colors.background} weight="regular" />
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

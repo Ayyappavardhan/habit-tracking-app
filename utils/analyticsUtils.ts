@@ -97,8 +97,13 @@ export function calculateBestStreak(datesToCheck: string[]): number {
 
 /**
  * Get date range for a period
+ * @param weekStartDay - 0 for Sunday, 1 for Monday
  */
-export function getDateRangeForPeriod(period: PeriodType, referenceDate: Date = new Date()): {
+export function getDateRangeForPeriod(
+    period: PeriodType,
+    referenceDate: Date = new Date(),
+    weekStartDay: 0 | 1 = 0
+): {
     startDate: Date;
     endDate: Date;
 } {
@@ -110,9 +115,11 @@ export function getDateRangeForPeriod(period: PeriodType, referenceDate: Date = 
 
     switch (period) {
         case 'week':
-            // Start from beginning of current week (Sunday)
+            // Start from beginning of current week based on weekStartDay setting
             const dayOfWeek = startDate.getDay();
-            startDate.setDate(startDate.getDate() - dayOfWeek);
+            // Calculate days to subtract to get to weekStartDay
+            const daysToSubtract = (dayOfWeek - weekStartDay + 7) % 7;
+            startDate.setDate(startDate.getDate() - daysToSubtract);
             break;
         case 'month':
             startDate.setDate(1);
@@ -255,55 +262,64 @@ export function getPreviousPeriodComparison(
 
 /**
  * Get weekly activity data for bar chart
+ * @param weekStartDay - 0 for Sunday, 1 for Monday
  */
 export function getWeeklyActivityData(
     habits: Habit[],
-    selectedHabitId?: string
+    selectedHabitId?: string,
+    weekStartDay: 0 | 1 = 0
 ): { day: string; value: number; isToday: boolean }[] {
     const today = getTodayLocal();
     const targetHabits = selectedHabitId
         ? habits.filter(h => h.id === selectedHabitId)
         : habits;
 
+    // Day names ordered starting from weekStartDay
+    const allDayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayNames = weekStartDay === 1
+        ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        : allDayNames;
+
     if (targetHabits.length === 0) {
-        return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => ({
+        return dayNames.map(day => ({
             day,
             value: 0,
             isToday: false,
         }));
     }
 
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const result: { day: string; value: number; isToday: boolean }[] = [];
 
     const now = new Date();
     const currentDayOfWeek = now.getDay();
+    // Calculate days to subtract to get to the start of week
+    const daysToSubtract = (currentDayOfWeek - weekStartDay + 7) % 7;
     const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - currentDayOfWeek);
+    startOfWeek.setDate(now.getDate() - daysToSubtract);
     startOfWeek.setHours(0, 0, 0, 0);
 
     for (let i = 0; i < 7; i++) {
         const date = new Date(startOfWeek);
         date.setDate(startOfWeek.getDate() + i);
         const dateStr = formatLocalDate(date);
+        const dayIndex = date.getDay();
 
         let completedCount = 0;
-        let scheduledCount = 0; // Count how many habits were scheduled for this day
+        let scheduledCount = 0;
 
         for (const habit of targetHabits) {
-            scheduledCount++; // Assuming daily for MVP
+            scheduledCount++;
             if (habit.completedDates[dateStr]) {
                 completedCount++;
             }
         }
 
-        // Percentage for this specific day = (Completed / Scheduled) * 100
         const completionRate = scheduledCount > 0
             ? Math.round((completedCount / scheduledCount) * 100)
             : 0;
 
         result.push({
-            day: dayNames[i],
+            day: allDayNames[dayIndex],
             value: completionRate,
             isToday: dateStr === today,
         });

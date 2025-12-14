@@ -16,6 +16,9 @@ const isWeb = Platform.OS === 'web';
 export const IOS_NOTIFICATION_LIMIT = 64;
 const IOS_WARNING_THRESHOLD = 55; // Warn when approaching limit
 
+// Fixed identifier for the app-wide daily reminder
+const APP_REMINDER_IDENTIFIER = 'app-daily-reminder';
+
 // Type imports for proper TypeScript support
 type NotificationsModule = typeof import('expo-notifications');
 type DeviceModule = typeof import('expo-device');
@@ -288,4 +291,67 @@ export async function rescheduleAllHabitNotifications(
 
     console.log(`Re-scheduled ${notificationMap.size} notifications`);
     return notificationMap;
+}
+
+/**
+ * Schedule the app-wide daily reminder notification
+ * This is a single daily notification reminding users to check their habits
+ */
+export async function scheduleAppDailyReminder(time: string): Promise<boolean> {
+    if (isWeb) {
+        console.log('Notifications not supported on web');
+        return false;
+    }
+
+    const Notifications = getNotifications();
+    if (!Notifications) return false;
+
+    try {
+        const hasPermission = await requestNotificationPermissions();
+        if (!hasPermission) return false;
+
+        // Cancel existing app reminder first to avoid duplicates
+        await cancelAppDailyReminder();
+
+        const [hours, minutes] = time.split(':').map(Number);
+
+        const notificationId = await Notifications.scheduleNotificationAsync({
+            content: {
+                title: '🌟 Time to check your habits!',
+                body: "Stay consistent and build your streak. You've got this!",
+                data: { type: 'app-reminder' },
+                sound: true,
+            },
+            trigger: {
+                type: Notifications.SchedulableTriggerInputTypes.DAILY,
+                hour: hours,
+                minute: minutes,
+            },
+            identifier: APP_REMINDER_IDENTIFIER,
+        });
+
+        console.log(`Scheduled app daily reminder at ${time} with ID: ${notificationId}`);
+        return true;
+    } catch (error) {
+        console.error('Error scheduling app daily reminder:', error);
+        return false;
+    }
+}
+
+/**
+ * Cancel the app-wide daily reminder notification
+ */
+export async function cancelAppDailyReminder(): Promise<void> {
+    if (isWeb) return;
+
+    const Notifications = getNotifications();
+    if (!Notifications) return;
+
+    try {
+        await Notifications.cancelScheduledNotificationAsync(APP_REMINDER_IDENTIFIER);
+        console.log('Cancelled app daily reminder');
+    } catch (error) {
+        // Ignore error if notification doesn't exist
+        console.log('No app daily reminder to cancel');
+    }
 }

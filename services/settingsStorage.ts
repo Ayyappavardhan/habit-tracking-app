@@ -38,8 +38,7 @@ export async function loadSettings(): Promise<AppSettings> {
         if (json) {
             const stored = JSON.parse(json);
             // Merge with defaults to handle new settings fields
-            // TEST ONLY: Force onboarding on every reload as requested
-            return { ...DEFAULT_SETTINGS, ...stored, hasCompletedOnboarding: false };
+            return { ...DEFAULT_SETTINGS, ...stored };
         }
         return DEFAULT_SETTINGS;
     } catch (error) {

@@ -10,15 +10,16 @@ import { useNotes } from '@/context/NoteContext';
 import { useSettings } from '@/context/SettingsContext';
 import { useTheme } from '@/context/ThemeContext';
 import * as habitStorage from '@/services/habitStorage';
-import * as FileSystem from 'expo-file-system';
+import { documentDirectory, writeAsStringAsync } from 'expo-file-system/legacy';
 import { router } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { Bell, CalendarBlank, CaretLeft, CaretRight, CheckCircle, Clock, DownloadSimple, Info, Moon, Palette, Sun, Trash, X } from 'phosphor-react-native';
+import { Bell, CalendarBlank, CaretLeft, CaretRight, CheckCircle, Clock, DownloadSimple, Envelope, FileText, Info, Moon, Palette, ShieldCheck, Sun, Trash, X } from 'phosphor-react-native';
 import React, { useState } from 'react';
 import {
     Alert,
     Image,
     ImageSourcePropType,
+    Linking,
     Modal,
     ScrollView,
     StyleSheet,
@@ -52,6 +53,22 @@ export default function SettingsScreen() {
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [showAvatarSelector, setShowAvatarSelector] = useState(false);
 
+    const SUPPORT_EMAIL = 'vardhanayyappa@gmail.com';
+
+    const handleContactSupport = async () => {
+        const mailtoUrl = `mailto:${SUPPORT_EMAIL}?subject=Habit%20Tracker%20Support`;
+        const canOpen = await Linking.canOpenURL(mailtoUrl);
+        if (canOpen) {
+            await Linking.openURL(mailtoUrl);
+        } else {
+            Alert.alert(
+                'Contact Support',
+                `Please email us at:\n\n${SUPPORT_EMAIL}`,
+                [{ text: 'OK' }]
+            );
+        }
+    };
+
     const handleExportData = async () => {
         try {
             const data = {
@@ -60,25 +77,40 @@ export default function SettingsScreen() {
                 version: APP_VERSION,
             };
 
+            // Check if FileSystem is available (not on web)
+            if (!documentDirectory) {
+                Alert.alert(
+                    'Not Available',
+                    'Export is not available on web. Please use a mobile device to export your data.'
+                );
+                return;
+            }
+
             const fileName = `habits_backup_${new Date().toISOString().split('T')[0]}.json`;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const docDir = (FileSystem as any).documentDirectory || '';
-            const filePath = `${docDir}${fileName}`;
+            const filePath = `${documentDirectory}${fileName}`;
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await (FileSystem as any).writeAsStringAsync(filePath, JSON.stringify(data, null, 2));
+            // Write the file
+            await writeAsStringAsync(filePath, JSON.stringify(data, null, 2));
 
-            if (await Sharing.isAvailableAsync()) {
+            // Check if sharing is available
+            const isSharingAvailable = await Sharing.isAvailableAsync();
+            if (isSharingAvailable) {
                 await Sharing.shareAsync(filePath, {
                     mimeType: 'application/json',
                     dialogTitle: 'Export Habits Data',
                 });
             } else {
-                Alert.alert('Error', 'Sharing is not available on this device');
+                Alert.alert(
+                    'Export Complete',
+                    `Your data has been saved to: ${fileName}\n\nSharing is not available on this device.`
+                );
             }
         } catch (error) {
             console.error('Export error:', error);
-            Alert.alert('Error', 'Failed to export data');
+            Alert.alert(
+                'Export Failed',
+                'There was an error exporting your habits data. Please try again.'
+            );
         }
     };
 
@@ -378,6 +410,55 @@ export default function SettingsScreen() {
                                 <Text style={[styles.rowLabel, { color: Colors.error }]}>
                                     Clear All Data
                                 </Text>
+                            </View>
+                            <CaretRight size={20} color={colors.textSecondary} weight="regular" />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {/* Support & Legal Section */}
+                <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Support & Legal</Text>
+                    <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
+                        <TouchableOpacity
+                            style={styles.row}
+                            onPress={handleContactSupport}
+                        >
+                            <View style={styles.rowLeft}>
+                                <View style={[styles.iconContainer, { backgroundColor: '#FF9500' + '20' }]}>
+                                    <Envelope size={20} color="#FF9500" weight="regular" />
+                                </View>
+                                <Text style={[styles.rowLabel, { color: colors.text }]}>Contact Support</Text>
+                            </View>
+                            <CaretRight size={20} color={colors.textSecondary} weight="regular" />
+                        </TouchableOpacity>
+
+                        <View style={[styles.divider, { backgroundColor: colors.cardBorder }]} />
+
+                        <TouchableOpacity
+                            style={styles.row}
+                            onPress={() => Linking.openURL('https://habittracker.com/privacy')}
+                        >
+                            <View style={styles.rowLeft}>
+                                <View style={[styles.iconContainer, { backgroundColor: '#32ADE6' + '20' }]}>
+                                    <ShieldCheck size={20} color="#32ADE6" weight="regular" />
+                                </View>
+                                <Text style={[styles.rowLabel, { color: colors.text }]}>Privacy Policy</Text>
+                            </View>
+                            <CaretRight size={20} color={colors.textSecondary} weight="regular" />
+                        </TouchableOpacity>
+
+                        <View style={[styles.divider, { backgroundColor: colors.cardBorder }]} />
+
+                        <TouchableOpacity
+                            style={styles.row}
+                            onPress={() => Linking.openURL('https://habittracker.com/terms')}
+                        >
+                            <View style={styles.rowLeft}>
+                                <View style={[styles.iconContainer, { backgroundColor: '#A2845E' + '20' }]}>
+                                    <FileText size={20} color="#A2845E" weight="regular" />
+                                </View>
+                                <Text style={[styles.rowLabel, { color: colors.text }]}>Terms of Service</Text>
                             </View>
                             <CaretRight size={20} color={colors.textSecondary} weight="regular" />
                         </TouchableOpacity>

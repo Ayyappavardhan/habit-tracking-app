@@ -3,11 +3,13 @@
  * User creates their first habit.
  */
 
+import { DEFAULT_ICON, PopularHabit, popularHabitIcons } from '@/constants/iconData';
 import { BorderRadius, Spacing } from '@/constants/theme';
 import { useHabits } from '@/context/HabitContext';
 import { useSettings } from '@/context/SettingsContext';
 import { useTheme } from '@/context/ThemeContext';
 import { router } from 'expo-router';
+import * as PhosphorIcons from 'phosphor-react-native';
 import { ArrowLeft, CheckCircle } from 'phosphor-react-native';
 import React, { useState } from 'react';
 import {
@@ -22,46 +24,56 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const POPULAR_HABITS = [
-    { name: 'Drink Water', emoji: '💧' },
-    { name: 'Read Books', emoji: '📚' },
-    { name: 'Exercise', emoji: '💪' },
-    { name: 'Meditate', emoji: '🧘' },
-    { name: 'Wake Up Early', emoji: '🌅' },
-    { name: 'Walk', emoji: '🚶' },
-];
+// Use popular habits from iconData
+const POPULAR_HABITS = popularHabitIcons.slice(0, 6);
 
 export default function FirstHabitScreen() {
     const { addHabit } = useHabits();
-    const { updateSettings } = useSettings();
-    const { colors } = useTheme();
+    const { settings } = useSettings();
+    const { colors, isDark } = useTheme();
     const [habitName, setHabitName] = useState('');
     const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
+    const [selectedHabit, setSelectedHabit] = useState<PopularHabit | null>(null);
 
-    const handleSelectSuggestion = (name: string, emoji: string) => {
-        setHabitName(name);
-        setSelectedSuggestion(name);
+    // Helper to render Phosphor icon dynamically
+    const renderIcon = (iconName: string, size: number, color: string) => {
+        const IconComponent = (PhosphorIcons as any)[iconName];
+        if (IconComponent) {
+            return <IconComponent size={size} color={color} weight="regular" />;
+        }
+        return <PhosphorIcons.Star size={size} color={color} weight="regular" />;
+    };
+
+    const handleSelectSuggestion = (habit: PopularHabit) => {
+        setHabitName(habit.name);
+        setSelectedSuggestion(habit.name);
+        setSelectedHabit(habit);
     };
 
     const handleStartTracking = async () => {
         if (!habitName.trim()) return;
 
-        // Find emoji if suggested, otherwise default
-        const suggestion = POPULAR_HABITS.find(h => h.name === habitName);
-        const emoji = suggestion ? suggestion.emoji : '🎯'; // Default target emoji
-
-        // Add the habit with correct Habit interface properties
-        await addHabit({
+        // Use selected habit data or defaults for custom habits
+        const habitData = selectedHabit || {
             name: habitName,
-            category: 'health', // Default category
-            icon: emoji, // Use the selected emoji or default
-            metricType: 'boolean', // Simple completion by default
+            icon: DEFAULT_ICON,
             goal: 1,
             unit: 'times',
-            frequency: 'daily', // Default frequency
+            category: 'custom'
+        };
+
+        // Add the habit with appropriate properties
+        await addHabit({
+            name: habitName,
+            category: habitData.category as any,
+            icon: habitData.icon,
+            metricType: habitData.goal > 1 ? 'count' : 'boolean',
+            goal: habitData.goal,
+            unit: habitData.unit,
+            frequency: 'daily',
             daysPerWeek: 7,
-            notificationEnabled: false,
-            notificationTime: undefined,
+            notificationEnabled: settings.globalNotificationsEnabled,
+            notificationTime: settings.defaultNotificationTime,
         });
 
         // Navigate to completion screen
@@ -114,29 +126,38 @@ export default function FirstHabitScreen() {
                             Suggestions
                         </Text>
                         <View style={styles.suggestionsGrid}>
-                            {POPULAR_HABITS.map((habit) => (
-                                <TouchableOpacity
-                                    key={habit.name}
-                                    style={[
-                                        styles.suggestionCard,
-                                        {
-                                            backgroundColor: colors.card,
-                                            borderColor: selectedSuggestion === habit.name ? colors.accent : colors.cardBorder
-                                        },
-                                        selectedSuggestion === habit.name && { backgroundColor: colors.accent + '10' }
-                                    ]}
-                                    onPress={() => handleSelectSuggestion(habit.name, habit.emoji)}
-                                >
-                                    <Text style={styles.suggestionEmoji}>{habit.emoji}</Text>
-                                    <Text style={[
-                                        styles.suggestionText,
-                                        { color: colors.text },
-                                        selectedSuggestion === habit.name && { color: colors.accent, fontWeight: '600' }
-                                    ]}>
-                                        {habit.name}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
+                            {POPULAR_HABITS.map((habit) => {
+                                const isSelected = selectedSuggestion === habit.name;
+                                return (
+                                    <TouchableOpacity
+                                        key={habit.name}
+                                        style={[
+                                            styles.suggestionCard,
+                                            {
+                                                backgroundColor: colors.card,
+                                                borderColor: isSelected ? colors.accent : colors.cardBorder
+                                            },
+                                            isSelected && { backgroundColor: colors.accent + '10' }
+                                        ]}
+                                        onPress={() => handleSelectSuggestion(habit)}
+                                    >
+                                        <View style={[
+                                            styles.suggestionIconContainer,
+                                            { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' },
+                                            isSelected && { backgroundColor: colors.accent + '20' }
+                                        ]}>
+                                            {renderIcon(habit.icon, 24, isSelected ? colors.accent : colors.textSecondary)}
+                                        </View>
+                                        <Text style={[
+                                            styles.suggestionText,
+                                            { color: colors.text },
+                                            isSelected && { color: colors.accent, fontWeight: '600' }
+                                        ]}>
+                                            {habit.name}
+                                        </Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
                         </View>
                     </View>
                 </ScrollView>
@@ -220,15 +241,19 @@ const styles = StyleSheet.create({
         gap: Spacing.md,
     },
     suggestionCard: {
-        width: '47%', // roughly half width with gap
+        width: '47%',
         padding: Spacing.md,
         borderRadius: BorderRadius.lg,
         borderWidth: 1,
         alignItems: 'center',
         gap: Spacing.sm,
     },
-    suggestionEmoji: {
-        fontSize: 32,
+    suggestionIconContainer: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     suggestionText: {
         fontSize: 14,

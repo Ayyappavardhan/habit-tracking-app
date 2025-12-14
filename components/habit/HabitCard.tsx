@@ -10,11 +10,34 @@ import { Habit } from '@/types/habit';
 import { formatLocalDate } from '@/utils/dateUtils';
 import haptics from '@/utils/haptics';
 import { useRouter } from 'expo-router';
-import { Camera, CheckCircle, FileText, GearSix } from 'phosphor-react-native';
+import * as PhosphorIcons from 'phosphor-react-native';
+import { CheckCircle, FileText, GearSix, Star } from 'phosphor-react-native';
 import React, { useCallback } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ContributionGrid from './ContributionGrid';
 import StatsRow from './StatsRow';
+
+// Helper to check if icon is an emoji (legacy) or Phosphor icon name
+const isEmojiIcon = (icon: string): boolean => {
+    // Emojis typically have length > 1 when encoded, or contain unicode emoji characters
+    // Phosphor icon names are PascalCase alphabetic strings like 'Star', 'Heart', etc.
+    return /[\p{Emoji}\p{Extended_Pictographic}]/u.test(icon) || icon.length <= 2;
+};
+
+// Helper to render icon (Phosphor or emoji fallback)
+const renderHabitIcon = (icon: string, size: number, color: string) => {
+    if (isEmojiIcon(icon)) {
+        return <Text style={{ fontSize: size }}>{icon}</Text>;
+    }
+
+    const IconComponent = (PhosphorIcons as any)[icon];
+    if (IconComponent) {
+        return <IconComponent size={size} color={color} weight="regular" />;
+    }
+
+    // Default fallback
+    return <Star size={size} color={color} weight="regular" />;
+};
 
 interface HabitCardProps {
     habit: Habit;
@@ -69,7 +92,7 @@ export default function HabitCard({
             {/* Header */}
             <View style={styles.header}>
                 <View style={[styles.iconContainer, { backgroundColor: colors.backgroundSecondary }]}>
-                    <Text style={styles.icon}>{habit.icon}</Text>
+                    {renderHabitIcon(habit.icon, 20, colors.accent)}
                 </View>
                 <View style={styles.headerText}>
                     <Text style={[styles.habitName, { color: colors.text }]}>{habit.name}</Text>
@@ -116,9 +139,7 @@ export default function HabitCard({
                     </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.iconButton, { backgroundColor: colors.backgroundSecondary }]} onPress={handleAddPhoto}>
-                    <Camera size={20} color={colors.textSecondary} weight="regular" />
-                </TouchableOpacity>
+
             </View>
         </View>
     );

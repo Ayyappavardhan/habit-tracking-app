@@ -3,15 +3,18 @@
  * Form for creating new habits with categories, goals, and notifications
  */
 
-import { EmojiPicker, FrequencySelector, NotificationPicker } from '@/components/habit';
+import { FrequencySelector, IconPicker, NotificationPicker } from '@/components/habit';
+import { DEFAULT_ICON } from '@/constants/iconData';
 import { BorderRadius, Colors, Spacing } from '@/constants/theme';
 import { useHabits } from '@/context/HabitContext';
+import { useSettings } from '@/context/SettingsContext';
 import { useTheme } from '@/context/ThemeContext';
 import { categories, CategoryConfig } from '@/data/categories';
 import { FrequencyType, MetricType } from '@/types/habit';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import * as PhosphorIcons from 'phosphor-react-native';
 import React, { useState } from 'react';
 import {
     Alert,
@@ -30,28 +33,53 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function AddScreen() {
     const router = useRouter();
     const { addHabit } = useHabits();
+    const { settings } = useSettings();
     const { colors, isDark } = useTheme();
 
     // Form state
     const [name, setName] = useState('');
-    const [selectedEmoji, setSelectedEmoji] = useState('✨');
+    const [selectedIcon, setSelectedIcon] = useState(DEFAULT_ICON);
     const [selectedCategory, setSelectedCategory] = useState<CategoryConfig | null>(null);
     const [isCustomMode, setIsCustomMode] = useState(true); // Start in custom mode
-    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [showIconPicker, setShowIconPicker] = useState(false);
     const [showUnitPicker, setShowUnitPicker] = useState(false);
     const [metricType, setMetricType] = useState<MetricType>('count');
     const [goal, setGoal] = useState('1');
     const [unit, setUnit] = useState('times');
     const [frequency, setFrequency] = useState<FrequencyType>('daily');
     const [notificationEnabled, setNotificationEnabled] = useState(false);
-    const [notificationTime, setNotificationTime] = useState('09:00');
+    // Use the default notification time from settings
+    const [notificationTime, setNotificationTime] = useState(settings.defaultNotificationTime);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Filter out 'custom' from the category list
     const habitCategories = categories.filter(c => c.id !== 'custom');
 
-    // All available units
-    const allUnits = ['times', 'steps', 'minutes', 'hours', 'glasses', 'pages', 'reps', 'miles', 'km'];
+    // All available units - organized by category for better UX
+    const unitCategories = [
+        { name: 'Count & Frequency', units: ['times', 'count', 'sessions', 'sets', 'reps', 'rounds'] },
+        { name: 'Time', units: ['seconds', 'minutes', 'hours', 'days'] },
+        { name: 'Distance', units: ['meters', 'kilometers', 'km', 'miles', 'feet', 'yards', 'steps'] },
+        { name: 'Fitness', units: ['calories', 'kcal', 'laps', 'pushups', 'situps', 'pullups', 'squats'] },
+        { name: 'Hydration', units: ['ml', 'liters', 'oz', 'cups', 'glasses', 'bottles'] },
+        { name: 'Reading & Learning', units: ['pages', 'chapters', 'books', 'articles', 'lessons', 'words', 'flashcards'] },
+        { name: 'Productivity', units: ['tasks', 'emails', 'pomodoros', 'meetings', 'calls', 'projects'] },
+        { name: 'Health', units: ['pills', 'vitamins', 'mg', 'servings', 'meals', 'snacks'] },
+        { name: 'Finance', units: ['dollars', 'euros', 'rupees', 'percent', '%'] },
+        { name: 'Sleep', units: ['nights', 'naps'] },
+        { name: 'Social', units: ['messages', 'posts', 'photos', 'videos', 'friends', 'connections'] },
+        { name: 'Music & Practice', units: ['songs', 'scales', 'pieces', 'exercises'] },
+        { name: 'Miscellaneous', units: ['items', 'entries', 'points', 'credits', 'units'] },
+    ];
+
+    // Helper to render Phosphor icon dynamically
+    const renderIcon = (iconName: string, size: number, color: string) => {
+        const IconComponent = (PhosphorIcons as any)[iconName];
+        if (IconComponent) {
+            return <IconComponent size={size} color={color} weight="regular" />;
+        }
+        return <PhosphorIcons.Star size={size} color={color} weight="regular" />;
+    };
 
     const handleCategorySelect = (category: CategoryConfig) => {
         // If same category clicked, deselect and go to custom mode
@@ -63,7 +91,8 @@ export default function AddScreen() {
 
         setSelectedCategory(category);
         setIsCustomMode(false);
-        setSelectedEmoji(category.emoji);
+        // Update the hero icon to match the category
+        setSelectedIcon(category.icon);
         setMetricType(category.defaultMetric);
         setUnit(category.defaultUnit);
         setGoal(category.defaultGoal.toString());
@@ -74,15 +103,15 @@ export default function AddScreen() {
     const handleCustomSelect = () => {
         setSelectedCategory(null);
         setIsCustomMode(true);
-        setSelectedEmoji('✨');
+        setSelectedIcon(DEFAULT_ICON);
         setMetricType('count');
         setUnit('times');
         setGoal('1');
     };
 
-    const handleEmojiSelect = (emoji: string) => {
-        setSelectedEmoji(emoji);
-        // When user manually picks emoji, switch to custom mode
+    const handleIconSelect = (iconName: string) => {
+        setSelectedIcon(iconName);
+        // When user manually picks icon, switch to custom mode
         if (!isCustomMode) {
             setIsCustomMode(true);
             setSelectedCategory(null);
@@ -104,7 +133,7 @@ export default function AddScreen() {
         try {
             await addHabit({
                 name: name.trim(),
-                icon: selectedEmoji,
+                icon: selectedIcon,
                 category: selectedCategory?.id || 'custom',
                 metricType,
                 goal: parseInt(goal),
@@ -164,12 +193,14 @@ export default function AddScreen() {
                     {/* Step 1: Icon & Name */}
                     <View style={styles.heroSection}>
                         <TouchableOpacity
-                            style={styles.emojiSelector}
-                            onPress={() => setShowEmojiPicker(true)}
+                            style={styles.iconSelector}
+                            onPress={() => setShowIconPicker(true)}
                             activeOpacity={0.7}
                         >
-                            <Text style={styles.heroEmoji}>{selectedEmoji}</Text>
-                            <View style={[styles.emojiEditBadge, { backgroundColor: colors.accent, borderColor: colors.background }]}>
+                            <View style={[styles.heroIconContainer, { backgroundColor: colors.card }]}>
+                                {renderIcon(selectedIcon, 40, colors.accent)}
+                            </View>
+                            <View style={[styles.iconEditBadge, { backgroundColor: colors.accent, borderColor: colors.background }]}>
                                 <Ionicons name="pencil" size={10} color={colors.background} />
                             </View>
                         </TouchableOpacity>
@@ -228,27 +259,30 @@ export default function AddScreen() {
                             </TouchableOpacity>
 
                             {/* Template Categories */}
-                            {habitCategories.map((category) => (
-                                <TouchableOpacity
-                                    key={category.id}
-                                    style={[
-                                        styles.categoryChip,
-                                        { backgroundColor: colors.card },
-                                        selectedCategory?.id === category.id && { borderColor: colors.accent, backgroundColor: colors.accent },
-                                    ]}
-                                    onPress={() => handleCategorySelect(category)}
-                                    activeOpacity={0.7}
-                                >
-                                    <Text style={styles.categoryEmoji}>{category.emoji}</Text>
-                                    <Text style={[
-                                        styles.categoryName,
-                                        { color: colors.textSecondary },
-                                        selectedCategory?.id === category.id && { color: colors.background, fontWeight: '600' },
-                                    ]}>
-                                        {category.name}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
+                            {habitCategories.map((category) => {
+                                const isSelected = selectedCategory?.id === category.id;
+                                return (
+                                    <TouchableOpacity
+                                        key={category.id}
+                                        style={[
+                                            styles.categoryChip,
+                                            { backgroundColor: colors.card },
+                                            isSelected && { borderColor: colors.accent, backgroundColor: colors.accent },
+                                        ]}
+                                        onPress={() => handleCategorySelect(category)}
+                                        activeOpacity={0.7}
+                                    >
+                                        {renderIcon(category.icon, 16, isSelected ? colors.background : colors.textSecondary)}
+                                        <Text style={[
+                                            styles.categoryName,
+                                            { color: colors.textSecondary },
+                                            isSelected && { color: colors.background, fontWeight: '600' },
+                                        ]}>
+                                            {category.name}
+                                        </Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
                         </ScrollView>
                     </View>
 
@@ -314,12 +348,12 @@ export default function AddScreen() {
                 </ScrollView>
             </KeyboardAvoidingView>
 
-            {/* Emoji Picker Modal */}
-            <EmojiPicker
-                visible={showEmojiPicker}
-                selectedEmoji={selectedEmoji}
-                onSelect={handleEmojiSelect}
-                onClose={() => setShowEmojiPicker(false)}
+            {/* Icon Picker Modal */}
+            <IconPicker
+                visible={showIconPicker}
+                selectedIcon={selectedIcon}
+                onSelect={handleIconSelect}
+                onClose={() => setShowIconPicker(false)}
             />
 
             {/* Unit Picker Modal */}
@@ -337,30 +371,40 @@ export default function AddScreen() {
                                 <Ionicons name="close" size={24} color={colors.text} />
                             </TouchableOpacity>
                         </View>
-                        <View style={styles.unitGrid}>
-                            {allUnits.map((u) => (
-                                <TouchableOpacity
-                                    key={u}
-                                    style={[
-                                        styles.unitOption,
-                                        { backgroundColor: colors.card },
-                                        unit === u && { backgroundColor: colors.accent },
-                                    ]}
-                                    onPress={() => {
-                                        setUnit(u);
-                                        setShowUnitPicker(false);
-                                    }}
-                                >
-                                    <Text style={[
-                                        styles.unitOptionText,
-                                        { color: colors.textSecondary },
-                                        unit === u && { color: colors.background, fontWeight: '600' },
-                                    ]}>
-                                        {u}
+                        <ScrollView style={styles.unitScrollView} showsVerticalScrollIndicator={true}>
+                            {unitCategories.map((category) => (
+                                <View key={category.name} style={styles.unitCategory}>
+                                    <Text style={[styles.unitCategoryLabel, { color: colors.textSecondary }]}>
+                                        {category.name}
                                     </Text>
-                                </TouchableOpacity>
+                                    <View style={styles.unitGrid}>
+                                        {category.units.map((u) => (
+                                            <TouchableOpacity
+                                                key={u}
+                                                style={[
+                                                    styles.unitOption,
+                                                    { backgroundColor: colors.card },
+                                                    unit === u && { backgroundColor: colors.accent },
+                                                ]}
+                                                onPress={() => {
+                                                    setUnit(u);
+                                                    setShowUnitPicker(false);
+                                                }}
+                                            >
+                                                <Text style={[
+                                                    styles.unitOptionText,
+                                                    { color: colors.textSecondary },
+                                                    unit === u && { color: colors.background, fontWeight: '600' },
+                                                ]}>
+                                                    {u}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </View>
+                                </View>
                             ))}
-                        </View>
+                            <View style={{ height: 20 }} />
+                        </ScrollView>
                     </View>
                 </View>
             </Modal>
@@ -415,16 +459,20 @@ const styles = StyleSheet.create({
         paddingVertical: Spacing.lg,
         gap: Spacing.sm,
     },
-    emojiSelector: {
+    iconSelector: {
         position: 'relative',
     },
-    heroEmoji: {
-        fontSize: 56,
+    heroIconContainer: {
+        width: 72,
+        height: 72,
+        borderRadius: 36,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    emojiEditBadge: {
+    iconEditBadge: {
         position: 'absolute',
-        bottom: 0,
-        right: -4,
+        bottom: 2,
+        right: 2,
         width: 22,
         height: 22,
         borderRadius: 11,
@@ -623,5 +671,18 @@ const styles = StyleSheet.create({
     unitOptionTextSelected: {
         color: Colors.background,
         fontWeight: '600',
+    },
+    unitScrollView: {
+        maxHeight: 400,
+    },
+    unitCategory: {
+        marginBottom: Spacing.md,
+    },
+    unitCategoryLabel: {
+        fontSize: 12,
+        fontWeight: '600',
+        marginBottom: Spacing.xs,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
     },
 });

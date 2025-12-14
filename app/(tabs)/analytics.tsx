@@ -18,6 +18,7 @@ import {
 } from '@/components/analytics';
 import { Colors, Spacing } from '@/constants/theme';
 import { useHabits } from '@/context/HabitContext';
+import { useSettings } from '@/context/SettingsContext';
 import { useTheme } from '@/context/ThemeContext';
 import {
     calculateCompletionRate,
@@ -40,6 +41,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AnalyticsScreen() {
     const { habits } = useHabits();
+    const { settings } = useSettings();
     const { colors, isDark } = useTheme();
     const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('week');
     const [selectedHabitId, setSelectedHabitId] = useState<string | null>(null);
@@ -61,8 +63,8 @@ export default function AnalyticsScreen() {
     );
 
     const weeklyData = useMemo(
-        () => getWeeklyActivityData(habits, selectedHabitId || undefined),
-        [habits, selectedHabitId]
+        () => getWeeklyActivityData(habits, selectedHabitId || undefined, settings.weekStartDay),
+        [habits, selectedHabitId, settings.weekStartDay]
     );
 
     // NEW: Premium analytics data

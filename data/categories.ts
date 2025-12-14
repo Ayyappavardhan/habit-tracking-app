@@ -9,6 +9,7 @@ export interface CategoryConfig {
     id: HabitCategory;
     name: string;
     emoji: string;
+    icon: string; // Phosphor icon name
     defaultMetric: MetricType;
     defaultUnit: string;
     defaultGoal: number;
@@ -20,6 +21,7 @@ export const categories: CategoryConfig[] = [
         id: 'exercise',
         name: 'Exercise',
         emoji: '🏃',
+        icon: 'Barbell',
         defaultMetric: 'minutes',
         defaultUnit: 'minutes',
         defaultGoal: 30,
@@ -29,6 +31,7 @@ export const categories: CategoryConfig[] = [
         id: 'walking',
         name: 'Walking',
         emoji: '🚶',
+        icon: 'PersonSimpleWalk',
         defaultMetric: 'steps',
         defaultUnit: 'steps',
         defaultGoal: 10000,
@@ -38,6 +41,7 @@ export const categories: CategoryConfig[] = [
         id: 'reading',
         name: 'Reading',
         emoji: '📚',
+        icon: 'BookOpen',
         defaultMetric: 'minutes',
         defaultUnit: 'minutes',
         defaultGoal: 30,
@@ -47,6 +51,7 @@ export const categories: CategoryConfig[] = [
         id: 'meditation',
         name: 'Meditation',
         emoji: '🧘',
+        icon: 'FlowerLotus',
         defaultMetric: 'minutes',
         defaultUnit: 'minutes',
         defaultGoal: 10,
@@ -56,6 +61,7 @@ export const categories: CategoryConfig[] = [
         id: 'water',
         name: 'Water',
         emoji: '💧',
+        icon: 'Drop',
         defaultMetric: 'count',
         defaultUnit: 'glasses',
         defaultGoal: 8,
@@ -65,6 +71,7 @@ export const categories: CategoryConfig[] = [
         id: 'sleep',
         name: 'Sleep',
         emoji: '😴',
+        icon: 'Moon',
         defaultMetric: 'hours',
         defaultUnit: 'hours',
         defaultGoal: 8,
@@ -74,6 +81,7 @@ export const categories: CategoryConfig[] = [
         id: 'work',
         name: 'Work',
         emoji: '💼',
+        icon: 'Briefcase',
         defaultMetric: 'hours',
         defaultUnit: 'hours',
         defaultGoal: 8,
@@ -83,6 +91,7 @@ export const categories: CategoryConfig[] = [
         id: 'learning',
         name: 'Learning',
         emoji: '🎓',
+        icon: 'GraduationCap',
         defaultMetric: 'minutes',
         defaultUnit: 'minutes',
         defaultGoal: 30,
@@ -92,6 +101,7 @@ export const categories: CategoryConfig[] = [
         id: 'health',
         name: 'Health',
         emoji: '❤️',
+        icon: 'Heart',
         defaultMetric: 'boolean',
         defaultUnit: 'times',
         defaultGoal: 1,
@@ -101,6 +111,7 @@ export const categories: CategoryConfig[] = [
         id: 'custom',
         name: 'Custom',
         emoji: '✨',
+        icon: 'Star',
         defaultMetric: 'count',
         defaultUnit: 'times',
         defaultGoal: 1,

@@ -6,6 +6,7 @@
 import { BorderRadius, Colors, Spacing } from '@/constants/theme';
 import { useHabits } from '@/context/HabitContext';
 import { useNotes } from '@/context/NoteContext';
+import { useSettings } from '@/context/SettingsContext';
 import { useTheme } from '@/context/ThemeContext';
 import { Note } from '@/types/note';
 import { DayCompletionStats, formatDateForDisplay, getCompletionStatsForDate } from '@/utils/calendarUtils';
@@ -33,6 +34,7 @@ export default function CalendarModal({ visible, onClose }: CalendarModalProps) 
     const router = useRouter();
     const { habits, refreshHabits } = useHabits();
     const { notes, refreshNotes } = useNotes();
+    const { settings } = useSettings();
     const { colors, isDark } = useTheme();
     const today = formatLocalDate(new Date());
 
@@ -231,6 +233,7 @@ export default function CalendarModal({ visible, onClose }: CalendarModalProps) 
                         theme={calendarTheme}
                         maxDate={today}
                         enableSwipeMonths
+                        firstDay={settings.weekStartDay}
                         style={styles.calendar}
                         key={isDark ? 'dark' : 'light'}
                         renderArrow={(direction) => (

@@ -6,6 +6,7 @@
 import { EmojiPicker, FrequencySelector, NotificationPicker } from '@/components/habit';
 import { BorderRadius, Colors, Spacing } from '@/constants/theme';
 import { useHabits } from '@/context/HabitContext';
+import { useSettings } from '@/context/SettingsContext';
 import { useTheme } from '@/context/ThemeContext';
 import { categories } from '@/data/categories';
 import { FrequencyType } from '@/types/habit';
@@ -31,6 +32,7 @@ export default function EditHabitScreen() {
     const router = useRouter();
     const params = useLocalSearchParams<{ habitId: string }>();
     const { getHabitById, updateHabit, deleteHabit } = useHabits();
+    const { settings } = useSettings();
     const { colors, isDark } = useTheme();
 
     const habitId = params.habitId || '';
@@ -60,9 +62,10 @@ export default function EditHabitScreen() {
             setUnit(habit.unit);
             setFrequency(habit.frequency);
             setNotificationEnabled(habit.notificationEnabled);
-            setNotificationTime(habit.notificationTime || '09:00');
+            // Use habit's notification time, or fall back to default from settings
+            setNotificationTime(habit.notificationTime || settings.defaultNotificationTime);
         }
-    }, [habit]);
+    }, [habit, settings.defaultNotificationTime]);
 
     // Get category info for display
     const getCategoryLabel = () => {

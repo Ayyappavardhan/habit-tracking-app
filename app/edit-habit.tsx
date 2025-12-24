@@ -1,9 +1,5 @@
-/**
- * Edit Habit Screen
- * Form for editing existing habits including notification settings
- */
-
-import { EmojiPicker, FrequencySelector, NotificationPicker } from '@/components/habit';
+import { FrequencySelector, IconPicker, NotificationPicker } from '@/components/habit';
+import { DEFAULT_ICON } from '@/constants/iconData';
 import { BorderRadius, Colors, Spacing } from '@/constants/theme';
 import { useHabits } from '@/context/HabitContext';
 import { useSettings } from '@/context/SettingsContext';
@@ -13,6 +9,7 @@ import { FrequencyType } from '@/types/habit';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import * as PhosphorIcons from 'phosphor-react-native';
 import React, { useEffect, useState } from 'react';
 import {
     Alert,
@@ -40,32 +37,60 @@ export default function EditHabitScreen() {
 
     // Form state - will be initialized from habit
     const [name, setName] = useState('');
-    const [selectedEmoji, setSelectedEmoji] = useState('✨');
-    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [selectedIcon, setSelectedIcon] = useState(DEFAULT_ICON);
+    const [showIconPicker, setShowIconPicker] = useState(false);
     const [showUnitPicker, setShowUnitPicker] = useState(false);
     const [goal, setGoal] = useState('1');
     const [unit, setUnit] = useState('times');
     const [frequency, setFrequency] = useState<FrequencyType>('daily');
     const [notificationEnabled, setNotificationEnabled] = useState(false);
     const [notificationTime, setNotificationTime] = useState('09:00');
+    const [notificationDay, setNotificationDay] = useState<number | undefined>(undefined);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // All available units
-    const allUnits = ['times', 'steps', 'minutes', 'hours', 'glasses', 'pages', 'reps', 'miles', 'km'];
+    // All available units - organized by category for better UX
+    const unitCategories = [
+        { name: 'Count & Frequency', units: ['times', 'count', 'sessions', 'sets', 'reps', 'rounds'] },
+        { name: 'Time', units: ['seconds', 'minutes', 'hours', 'days'] },
+        { name: 'Distance', units: ['meters', 'kilometers', 'km', 'miles', 'feet', 'yards', 'steps'] },
+        { name: 'Fitness', units: ['calories', 'kcal', 'laps', 'pushups', 'situps', 'pullups', 'squats'] },
+        { name: 'Hydration', units: ['ml', 'liters', 'oz', 'cups', 'glasses', 'bottles'] },
+        { name: 'Reading & Learning', units: ['pages', 'chapters', 'books', 'articles', 'lessons', 'words', 'flashcards'] },
+        { name: 'Productivity', units: ['tasks', 'emails', 'pomodoros', 'meetings', 'calls', 'projects'] },
+        { name: 'Health', units: ['pills', 'vitamins', 'mg', 'servings', 'meals', 'snacks'] },
+        { name: 'Finance', units: ['dollars', 'euros', 'rupees', 'percent', '%'] },
+        { name: 'Sleep', units: ['nights', 'naps'] },
+        { name: 'Social', units: ['messages', 'posts', 'photos', 'videos', 'friends', 'connections'] },
+        { name: 'Music & Practice', units: ['songs', 'scales', 'pieces', 'exercises'] },
+        { name: 'Miscellaneous', units: ['items', 'entries', 'points', 'credits', 'units'] },
+    ];
 
     // Initialize form with habit data
     useEffect(() => {
         if (habit) {
             setName(habit.name);
-            setSelectedEmoji(habit.icon);
+            // If habit.icon is likely an emoji (length <= 2), default to a generic icon, otherwise use it
+            // This handles migration from old emoji icons to new phosphor strings
+            const isEmoji = habit.icon && habit.icon.length <= 2;
+            setSelectedIcon(isEmoji ? DEFAULT_ICON : habit.icon);
             setGoal(habit.goal.toString());
             setUnit(habit.unit);
             setFrequency(habit.frequency);
             setNotificationEnabled(habit.notificationEnabled);
             // Use habit's notification time, or fall back to default from settings
             setNotificationTime(habit.notificationTime || settings.defaultNotificationTime);
+            setNotificationDay(habit.notificationDay);
         }
     }, [habit, settings.defaultNotificationTime]);
+
+    // Helper to render Phosphor icon dynamically
+    const renderIcon = (iconName: string, size: number, color: string) => {
+        const IconComponent = (PhosphorIcons as any)[iconName];
+        if (IconComponent) {
+            return <IconComponent size={size} color={color} weight="regular" />;
+        }
+        return <PhosphorIcons.Star size={size} color={color} weight="regular" />;
+    };
 
     // Get category info for display
     const getCategoryLabel = () => {
@@ -89,13 +114,14 @@ export default function EditHabitScreen() {
         try {
             await updateHabit(habitId, {
                 name: name.trim(),
-                icon: selectedEmoji,
+                icon: selectedIcon,
                 goal: parseInt(goal),
                 unit,
                 frequency,
                 daysPerWeek: frequency === 'daily' ? 7 : frequency === 'weekly' ? 1 : 1,
                 notificationEnabled,
                 notificationTime: notificationEnabled ? notificationTime : undefined,
+                notificationDay: notificationEnabled ? notificationDay : undefined,
             });
 
             Alert.alert('Updated! ✓', `"${name}" has been updated.`, [
@@ -178,12 +204,14 @@ export default function EditHabitScreen() {
                     {/* Icon & Name */}
                     <View style={styles.heroSection}>
                         <TouchableOpacity
-                            style={styles.emojiSelector}
-                            onPress={() => setShowEmojiPicker(true)}
+                            style={styles.iconSelector}
+                            onPress={() => setShowIconPicker(true)}
                             activeOpacity={0.7}
                         >
-                            <Text style={styles.heroEmoji}>{selectedEmoji}</Text>
-                            <View style={[styles.emojiEditBadge, { backgroundColor: colors.accent, borderColor: colors.background }]}>
+                            <View style={[styles.heroIconContainer, { backgroundColor: colors.card }]}>
+                                {renderIcon(selectedIcon, 40, colors.accent)}
+                            </View>
+                            <View style={[styles.iconEditBadge, { backgroundColor: colors.accent, borderColor: colors.background }]}>
                                 <Ionicons name="pencil" size={10} color={colors.background} />
                             </View>
                         </TouchableOpacity>
@@ -233,14 +261,17 @@ export default function EditHabitScreen() {
                     <View style={styles.notificationSection}>
                         <Text style={[styles.notificationHint, { color: colors.textSecondary }]}>
                             {notificationEnabled
-                                ? '🔔 You will receive daily reminders'
+                                ? `🔔 You will receive ${frequency} reminders`
                                 : '🔕 Enable to get reminders for this habit'}
                         </Text>
                         <NotificationPicker
                             enabled={notificationEnabled}
                             time={notificationTime}
+                            frequency={frequency}
+                            day={notificationDay}
                             onToggle={setNotificationEnabled}
                             onTimeChange={setNotificationTime}
+                            onDayChange={setNotificationDay}
                         />
                     </View>
 
@@ -279,12 +310,12 @@ export default function EditHabitScreen() {
                 </ScrollView>
             </KeyboardAvoidingView>
 
-            {/* Emoji Picker Modal */}
-            <EmojiPicker
-                visible={showEmojiPicker}
-                selectedEmoji={selectedEmoji}
-                onSelect={setSelectedEmoji}
-                onClose={() => setShowEmojiPicker(false)}
+            {/* Icon Picker Modal */}
+            <IconPicker
+                visible={showIconPicker}
+                selectedIcon={selectedIcon}
+                onSelect={setSelectedIcon}
+                onClose={() => setShowIconPicker(false)}
             />
 
             {/* Unit Picker Modal */}
@@ -302,28 +333,40 @@ export default function EditHabitScreen() {
                                 <Ionicons name="close" size={24} color={colors.text} />
                             </TouchableOpacity>
                         </View>
-                        <View style={styles.unitGrid}>
-                            {allUnits.map((u) => (
-                                <TouchableOpacity
-                                    key={u}
-                                    style={[
-                                        styles.unitOption,
-                                        unit === u && styles.unitOptionSelected,
-                                    ]}
-                                    onPress={() => {
-                                        setUnit(u);
-                                        setShowUnitPicker(false);
-                                    }}
-                                >
-                                    <Text style={[
-                                        styles.unitOptionText,
-                                        unit === u && styles.unitOptionTextSelected,
-                                    ]}>
-                                        {u}
+                        <ScrollView style={styles.unitScrollView} showsVerticalScrollIndicator={true}>
+                            {unitCategories.map((category) => (
+                                <View key={category.name} style={styles.unitCategory}>
+                                    <Text style={[styles.unitCategoryLabel, { color: colors.textSecondary }]}>
+                                        {category.name}
                                     </Text>
-                                </TouchableOpacity>
+                                    <View style={styles.unitGrid}>
+                                        {category.units.map((u) => (
+                                            <TouchableOpacity
+                                                key={u}
+                                                style={[
+                                                    styles.unitOption,
+                                                    { backgroundColor: colors.card },
+                                                    unit === u && { backgroundColor: colors.accent },
+                                                ]}
+                                                onPress={() => {
+                                                    setUnit(u);
+                                                    setShowUnitPicker(false);
+                                                }}
+                                            >
+                                                <Text style={[
+                                                    styles.unitOptionText,
+                                                    { color: colors.textSecondary },
+                                                    unit === u && { color: colors.background, fontWeight: '600' },
+                                                ]}>
+                                                    {u}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </View>
+                                </View>
                             ))}
-                        </View>
+                            <View style={{ height: 20 }} />
+                        </ScrollView>
                     </View>
                 </View>
             </Modal>
@@ -378,16 +421,20 @@ const styles = StyleSheet.create({
         paddingVertical: Spacing.lg,
         gap: Spacing.sm,
     },
-    emojiSelector: {
+    iconSelector: {
         position: 'relative',
     },
-    heroEmoji: {
-        fontSize: 56,
+    heroIconContainer: {
+        width: 72,
+        height: 72,
+        borderRadius: 36,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    emojiEditBadge: {
+    iconEditBadge: {
         position: 'absolute',
-        bottom: 0,
-        right: -4,
+        bottom: 2,
+        right: 2,
         width: 22,
         height: 22,
         borderRadius: 11,
@@ -591,5 +638,18 @@ const styles = StyleSheet.create({
     unitOptionTextSelected: {
         color: Colors.background,
         fontWeight: '600',
+    },
+    unitScrollView: {
+        maxHeight: 400,
+    },
+    unitCategory: {
+        marginBottom: Spacing.md,
+    },
+    unitCategoryLabel: {
+        fontSize: 12,
+        fontWeight: '600',
+        marginBottom: Spacing.xs,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
     },
 });

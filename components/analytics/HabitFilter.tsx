@@ -7,6 +7,7 @@ import { BorderRadius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { Habit } from '@/types/habit';
 import { Ionicons } from '@expo/vector-icons';
+import * as PhosphorIcons from 'phosphor-react-native';
 import React, { useState } from 'react';
 import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -16,6 +17,23 @@ interface HabitFilterProps {
     onSelect: (habitId: string | null) => void;
 }
 
+// Dynamic icon rendering helper
+const renderHabitIcon = (iconName: string, size: number, color: string) => {
+    // Check if it's likely an emoji (short string, usually 1-2 chars)
+    if (iconName.length <= 2) {
+        return <Text style={{ fontSize: size }}>{iconName}</Text>;
+    }
+
+    // Try to render as Phosphor icon
+    const IconComponent = (PhosphorIcons as any)[iconName];
+    if (IconComponent) {
+        return <IconComponent size={size} color={color} weight="fill" />;
+    }
+
+    // Fallback to Star icon if not found
+    return <PhosphorIcons.Star size={size} color={color} weight="fill" />;
+};
+
 export default function HabitFilter({ habits, selectedHabitId, onSelect }: HabitFilterProps) {
     const [isOpen, setIsOpen] = useState(false);
     const { colors, isDark } = useTheme();
@@ -23,10 +41,6 @@ export default function HabitFilter({ habits, selectedHabitId, onSelect }: Habit
     const selectedHabit = selectedHabitId
         ? habits.find(h => h.id === selectedHabitId)
         : null;
-
-    const displayText = selectedHabit
-        ? `${selectedHabit.icon} ${selectedHabit.name}`
-        : 'All Habits';
 
     const handleSelect = (habitId: string | null) => {
         onSelect(habitId);
@@ -41,7 +55,16 @@ export default function HabitFilter({ habits, selectedHabitId, onSelect }: Habit
                 activeOpacity={0.7}
             >
                 <Text style={[styles.label, { color: colors.textSecondary }]}>Habit:</Text>
-                <Text style={[styles.selectedText, { color: colors.text }]}>{displayText}</Text>
+
+                {selectedHabit ? (
+                    <View style={styles.selectedContent}>
+                        {renderHabitIcon(selectedHabit.icon, 16, colors.text)}
+                        <Text style={[styles.selectedText, { color: colors.text }]}>{selectedHabit.name}</Text>
+                    </View>
+                ) : (
+                    <Text style={[styles.selectedText, { color: colors.text }]}>All Habits</Text>
+                )}
+
                 <Ionicons name="chevron-down" size={16} color={colors.text} />
             </TouchableOpacity>
 
@@ -73,7 +96,9 @@ export default function HabitFilter({ habits, selectedHabitId, onSelect }: Habit
                                 ]}
                                 onPress={() => handleSelect(null)}
                             >
-                                <Text style={styles.optionIcon}>📊</Text>
+                                <View style={styles.iconContainer}>
+                                    <Text style={styles.emojiIcon}>📊</Text>
+                                </View>
                                 <Text style={[
                                     styles.optionText,
                                     { color: colors.text },
@@ -96,7 +121,13 @@ export default function HabitFilter({ habits, selectedHabitId, onSelect }: Habit
                                     ]}
                                     onPress={() => handleSelect(habit.id)}
                                 >
-                                    <Text style={styles.optionIcon}>{habit.icon}</Text>
+                                    <View style={styles.iconContainer}>
+                                        {renderHabitIcon(
+                                            habit.icon,
+                                            20,
+                                            selectedHabitId === habit.id ? colors.accent : colors.text
+                                        )}
+                                    </View>
                                     <Text style={[
                                         styles.optionText,
                                         { color: colors.text },
@@ -130,6 +161,11 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '600',
     },
+    selectedContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: Spacing.xs,
+    },
     overlay: {
         flex: 1,
         justifyContent: 'center',
@@ -160,9 +196,13 @@ const styles = StyleSheet.create({
         padding: Spacing.md,
         gap: Spacing.sm,
     },
-    optionIcon: {
-        fontSize: 20,
+    iconContainer: {
         width: 28,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emojiIcon: {
+        fontSize: 20,
         textAlign: 'center',
     },
     optionText: {

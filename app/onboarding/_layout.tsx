@@ -6,6 +6,9 @@ export default function OnboardingLayout() {
         <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
             <Stack.Screen name="index" />
             <Stack.Screen name="features" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="pain-point" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="solution-method" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="solution-flexibility" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="privacy" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="profile" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="first-habit" options={{ animation: 'slide_from_right' }} />

@@ -1,12 +1,12 @@
 /**
  * Onboarding - Profile Screen
  * User enters name and selects avatar.
+ * Always uses dark theme for consistent onboarding experience.
  */
 
 import { EmojiPicker } from '@/components/habit';
-import { BorderRadius, Colors, Spacing } from '@/constants/theme';
+import { BorderRadius, Spacing } from '@/constants/theme';
 import { useSettings } from '@/context/SettingsContext';
-import { useTheme } from '@/context/ThemeContext';
 import { router } from 'expo-router';
 import { ArrowLeft, ArrowRight, CheckCircle, PencilSimple } from 'phosphor-react-native';
 import React, { useState } from 'react';
@@ -25,22 +25,40 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Avatar Assets
-const AVATAR_MALE = require('@/assets/images/avatar-male.png');
-const AVATAR_FEMALE = require('@/assets/images/avatar-female.png');
+// Avatar Assets - Diverse options for all users
+const AVATARS = [
+    { id: 'avatar-male', label: 'Adult Male', source: require('@/assets/images/avatar-male.png') },
+    { id: 'avatar-female', label: 'Adult Female', source: require('@/assets/images/avatar-female.png') },
+    { id: 'avatar-male-child', label: 'Boy', source: require('@/assets/images/avatar-male-child.png') },
+    { id: 'avatar-female-child', label: 'Girl', source: require('@/assets/images/avatar-female-child.png') },
+    { id: 'avatar-male-teen', label: 'Teen Boy', source: require('@/assets/images/avatar-male-teen.png') },
+    { id: 'avatar-female-teen', label: 'Teen Girl', source: require('@/assets/images/avatar-female-teen.png') },
+    { id: 'avatar-male-young', label: 'Young Man', source: require('@/assets/images/avatar-male-young.png') },
+    { id: 'avatar-male-pro', label: 'Professional', source: require('@/assets/images/avatar-male-pro.png') },
+];
+
+// Force dark theme colors for onboarding
+const ONBOARDING_COLORS = {
+    background: '#0D0D0D',
+    backgroundSecondary: '#1A1A1A',
+    text: '#FFFFFF',
+    textSecondary: '#8E8E93',
+    textMuted: '#636366',
+    accent: '#FFD700',
+    card: '#1C1C1E',
+    cardBorder: '#2C2C2E',
+};
 
 export default function ProfileScreen() {
     const { settings, updateSettings } = useSettings();
-    const { colors, isDark } = useTheme();
     const [name, setName] = useState(settings.userName);
     const [avatar, setAvatar] = useState(settings.userAvatar);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [showAvatarSelector, setShowAvatarSelector] = useState(false);
 
     const getAvatarImage = (avatarString: string): ImageSourcePropType | null => {
-        if (avatarString === 'avatar-male') return AVATAR_MALE;
-        if (avatarString === 'avatar-female') return AVATAR_FEMALE;
-        return null;
+        const avatarData = AVATARS.find(a => a.id === avatarString);
+        return avatarData?.source || null;
     };
 
     const renderAvatar = () => {
@@ -59,7 +77,7 @@ export default function ProfileScreen() {
     };
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <SafeAreaView style={[styles.container, { backgroundColor: ONBOARDING_COLORS.background }]}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{ flex: 1 }}
@@ -67,42 +85,42 @@ export default function ProfileScreen() {
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     <View style={styles.header}>
                         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                            <ArrowLeft size={24} color={colors.text} weight="regular" />
+                            <ArrowLeft size={24} color={ONBOARDING_COLORS.text} weight="regular" />
                         </TouchableOpacity>
                     </View>
 
                     <View style={styles.content}>
-                        <Text style={[styles.title, { color: colors.text }]}>
+                        <Text style={[styles.title, { color: ONBOARDING_COLORS.text }]}>
                             Let's get to know you
                         </Text>
-                        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                        <Text style={[styles.subtitle, { color: ONBOARDING_COLORS.textSecondary }]}>
                             Choose an avatar and tell us your name.
                         </Text>
 
                         {/* Avatar Selection */}
                         <TouchableOpacity
-                            style={[styles.avatarContainer, { backgroundColor: colors.backgroundSecondary }]}
+                            style={[styles.avatarContainer, { backgroundColor: ONBOARDING_COLORS.backgroundSecondary }]}
                             onPress={() => setShowAvatarSelector(true)}
                         >
                             {renderAvatar()}
-                            <View style={[styles.editBadge, { backgroundColor: colors.accent }]}>
-                                <PencilSimple size={16} color={colors.background} weight="bold" />
+                            <View style={[styles.editBadge, { backgroundColor: ONBOARDING_COLORS.accent, borderColor: ONBOARDING_COLORS.background }]}>
+                                <PencilSimple size={16} color={ONBOARDING_COLORS.background} weight="bold" />
                             </View>
                         </TouchableOpacity>
 
                         {/* Name Input */}
                         <View style={styles.inputContainer}>
-                            <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Your Name</Text>
+                            <Text style={[styles.inputLabel, { color: ONBOARDING_COLORS.textSecondary }]}>Your Name</Text>
                             <TextInput
                                 style={[styles.textInput, {
-                                    backgroundColor: colors.card,
-                                    color: colors.text,
-                                    borderColor: colors.cardBorder
+                                    backgroundColor: ONBOARDING_COLORS.card,
+                                    color: ONBOARDING_COLORS.text,
+                                    borderColor: ONBOARDING_COLORS.cardBorder
                                 }]}
                                 value={name}
                                 onChangeText={setName}
                                 placeholder="Enter your name"
-                                placeholderTextColor={colors.textMuted}
+                                placeholderTextColor={ONBOARDING_COLORS.textMuted}
                                 maxLength={30}
                             />
                         </View>
@@ -113,16 +131,16 @@ export default function ProfileScreen() {
                     <TouchableOpacity
                         style={[
                             styles.button,
-                            { backgroundColor: colors.accent },
+                            { backgroundColor: ONBOARDING_COLORS.accent },
                             !name.trim() && { opacity: 0.5 }
                         ]}
                         onPress={handleContinue}
                         disabled={!name.trim()}
                     >
-                        <Text style={[styles.buttonText, { color: colors.background }]}>
+                        <Text style={[styles.buttonText, { color: ONBOARDING_COLORS.background }]}>
                             Continue
                         </Text>
-                        <ArrowRight size={20} color={colors.background} weight="regular" />
+                        <ArrowRight size={20} color={ONBOARDING_COLORS.background} weight="regular" />
                     </TouchableOpacity>
                 </View>
 
@@ -134,50 +152,46 @@ export default function ProfileScreen() {
                     onRequestClose={() => setShowAvatarSelector(false)}
                 >
                     <TouchableOpacity
-                        style={[styles.modalOverlay, { backgroundColor: isDark ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.5)' }]}
+                        style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.7)' }]}
                         activeOpacity={1}
                         onPress={() => setShowAvatarSelector(false)}
                     >
-                        <View style={[styles.avatarModalContent, { backgroundColor: colors.card }]}>
-                            <Text style={[styles.modalTitle, { color: colors.text }]}>Choose Avatar</Text>
+                        <View style={[styles.avatarModalContent, { backgroundColor: ONBOARDING_COLORS.card }]}>
+                            <Text style={[styles.modalTitle, { color: ONBOARDING_COLORS.text }]}>Choose Avatar</Text>
 
-                            <View style={styles.avatarOptionsContainer}>
-                                <TouchableOpacity
-                                    style={styles.avatarOption}
-                                    onPress={() => {
-                                        setAvatar('avatar-male');
-                                        setShowAvatarSelector(false);
-                                    }}
-                                >
-                                    <View style={[styles.avatarOptionImageContainer, { backgroundColor: colors.backgroundSecondary }]}>
-                                        <Image source={AVATAR_MALE} style={styles.avatarOptionImage} />
-                                    </View>
-                                    <Text style={[styles.avatarOptionLabel, { color: colors.text }]}>Male</Text>
-                                    {avatar === 'avatar-male' && (
-                                        <View style={[styles.selectedBadge, { backgroundColor: colors.accent }]}>
-                                            <CheckCircle size={12} color="#FFF" weight="fill" />
+                            <ScrollView
+                                style={styles.avatarScrollView}
+                                contentContainerStyle={styles.avatarOptionsContainer}
+                                showsVerticalScrollIndicator={false}
+                            >
+                                {AVATARS.map((avatarOption) => (
+                                    <TouchableOpacity
+                                        key={avatarOption.id}
+                                        style={styles.avatarOption}
+                                        onPress={() => {
+                                            setAvatar(avatarOption.id);
+                                            setShowAvatarSelector(false);
+                                        }}
+                                    >
+                                        <View style={[
+                                            styles.avatarOptionImageContainer,
+                                            { backgroundColor: ONBOARDING_COLORS.backgroundSecondary },
+                                            avatar === avatarOption.id && { borderColor: ONBOARDING_COLORS.accent, borderWidth: 2 }
+                                        ]}>
+                                            <Image source={avatarOption.source} style={styles.avatarOptionImage} />
                                         </View>
-                                    )}
-                                </TouchableOpacity>
+                                        <Text style={[styles.avatarOptionLabel, { color: ONBOARDING_COLORS.text }]}>
+                                            {avatarOption.label}
+                                        </Text>
+                                        {avatar === avatarOption.id && (
+                                            <View style={[styles.selectedBadge, { backgroundColor: ONBOARDING_COLORS.accent, borderColor: ONBOARDING_COLORS.card }]}>
+                                                <CheckCircle size={12} color="#FFF" weight="fill" />
+                                            </View>
+                                        )}
+                                    </TouchableOpacity>
+                                ))}
 
-                                <TouchableOpacity
-                                    style={styles.avatarOption}
-                                    onPress={() => {
-                                        setAvatar('avatar-female');
-                                        setShowAvatarSelector(false);
-                                    }}
-                                >
-                                    <View style={[styles.avatarOptionImageContainer, { backgroundColor: colors.backgroundSecondary }]}>
-                                        <Image source={AVATAR_FEMALE} style={styles.avatarOptionImage} />
-                                    </View>
-                                    <Text style={[styles.avatarOptionLabel, { color: colors.text }]}>Female</Text>
-                                    {avatar === 'avatar-female' && (
-                                        <View style={[styles.selectedBadge, { backgroundColor: colors.accent }]}>
-                                            <CheckCircle size={12} color="#FFF" weight="fill" />
-                                        </View>
-                                    )}
-                                </TouchableOpacity>
-
+                                {/* Emoji Option */}
                                 <TouchableOpacity
                                     style={styles.avatarOption}
                                     onPress={() => {
@@ -185,18 +199,18 @@ export default function ProfileScreen() {
                                         setTimeout(() => setShowEmojiPicker(true), 300);
                                     }}
                                 >
-                                    <View style={[styles.avatarOptionImageContainer, { backgroundColor: colors.backgroundSecondary }]}>
+                                    <View style={[styles.avatarOptionImageContainer, { backgroundColor: ONBOARDING_COLORS.backgroundSecondary }]}>
                                         <Text style={{ fontSize: 32 }}>😊</Text>
                                     </View>
-                                    <Text style={[styles.avatarOptionLabel, { color: colors.text }]}>Emoji</Text>
+                                    <Text style={[styles.avatarOptionLabel, { color: ONBOARDING_COLORS.text }]}>Emoji</Text>
                                 </TouchableOpacity>
-                            </View>
+                            </ScrollView>
 
                             <TouchableOpacity
-                                style={[styles.cancelButton, { backgroundColor: colors.backgroundSecondary }]}
+                                style={[styles.cancelButton, { backgroundColor: ONBOARDING_COLORS.backgroundSecondary }]}
                                 onPress={() => setShowAvatarSelector(false)}
                             >
-                                <Text style={[styles.cancelButtonText, { color: colors.text }]}>Cancel</Text>
+                                <Text style={[styles.cancelButtonText, { color: ONBOARDING_COLORS.text }]}>Cancel</Text>
                             </TouchableOpacity>
                         </View>
                     </TouchableOpacity>
@@ -274,7 +288,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 3,
-        borderColor: Colors.background,
+        borderColor: '#0D0D0D',
     },
     inputContainer: {
         width: '100%',
@@ -325,11 +339,15 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         marginBottom: Spacing.lg,
     },
+    avatarScrollView: {
+        maxHeight: 300,
+        width: '100%',
+    },
     avatarOptionsContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
         gap: Spacing.md,
-        marginBottom: Spacing.xl,
+        paddingBottom: Spacing.md,
         flexWrap: 'wrap',
     },
     avatarOption: {
@@ -364,7 +382,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: Colors.card,
+        borderColor: '#1C1C1E',
     },
     cancelButton: {
         paddingVertical: Spacing.sm,

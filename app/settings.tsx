@@ -10,10 +10,11 @@ import { useNotes } from '@/context/NoteContext';
 import { useSettings } from '@/context/SettingsContext';
 import { useTheme } from '@/context/ThemeContext';
 import * as habitStorage from '@/services/habitStorage';
+import { getNotificationDebugInfo } from '@/services/notifications';
 import { documentDirectory, writeAsStringAsync } from 'expo-file-system/legacy';
 import { router } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { Bell, CalendarBlank, CaretLeft, CaretRight, CheckCircle, Clock, DownloadSimple, Envelope, FileText, Info, Moon, Palette, ShieldCheck, Sun, Trash, X } from 'phosphor-react-native';
+import { ArrowCounterClockwise, Bell, CalendarBlank, CaretLeft, CaretRight, CheckCircle, Clock, DownloadSimple, Envelope, Info, Moon, Palette, ShieldCheck, Sun, Trash, X } from 'phosphor-react-native';
 import React, { useState } from 'react';
 import {
     Alert,
@@ -33,9 +34,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const APP_VERSION = '1.0.0';
 
-// Avatar Assets
-const AVATAR_MALE = require('@/assets/images/avatar-male.png');
-const AVATAR_FEMALE = require('@/assets/images/avatar-female.png');
+// Avatar Assets - Diverse options for all users
+const AVATARS = [
+    { id: 'avatar-male', label: 'Adult Male', source: require('@/assets/images/avatar-male.png') },
+    { id: 'avatar-female', label: 'Adult Female', source: require('@/assets/images/avatar-female.png') },
+    { id: 'avatar-male-child', label: 'Boy', source: require('@/assets/images/avatar-male-child.png') },
+    { id: 'avatar-female-child', label: 'Girl', source: require('@/assets/images/avatar-female-child.png') },
+    { id: 'avatar-male-teen', label: 'Teen Boy', source: require('@/assets/images/avatar-male-teen.png') },
+    { id: 'avatar-female-teen', label: 'Teen Girl', source: require('@/assets/images/avatar-female-teen.png') },
+    { id: 'avatar-male-young', label: 'Young Man', source: require('@/assets/images/avatar-male-young.png') },
+    { id: 'avatar-male-pro', label: 'Professional', source: require('@/assets/images/avatar-male-pro.png') },
+];
 
 // Time options for the picker
 const TIME_OPTIONS = [
@@ -163,9 +172,8 @@ export default function SettingsScreen() {
     const displayName = settings.userName || 'User';
 
     const getAvatarImage = (avatarString: string): ImageSourcePropType | null => {
-        if (avatarString === 'avatar-male') return AVATAR_MALE;
-        if (avatarString === 'avatar-female') return AVATAR_FEMALE;
-        return null;
+        const avatarData = AVATARS.find(a => a.id === avatarString);
+        return avatarData?.source || null;
     };
 
     const renderAvatar = () => {
@@ -448,20 +456,6 @@ export default function SettingsScreen() {
                             <CaretRight size={20} color={colors.textSecondary} weight="regular" />
                         </TouchableOpacity>
 
-                        <View style={[styles.divider, { backgroundColor: colors.cardBorder }]} />
-
-                        <TouchableOpacity
-                            style={styles.row}
-                            onPress={() => Linking.openURL('https://habittracker.com/terms')}
-                        >
-                            <View style={styles.rowLeft}>
-                                <View style={[styles.iconContainer, { backgroundColor: '#A2845E' + '20' }]}>
-                                    <FileText size={20} color="#A2845E" weight="regular" />
-                                </View>
-                                <Text style={[styles.rowLabel, { color: colors.text }]}>Terms of Service</Text>
-                            </View>
-                            <CaretRight size={20} color={colors.textSecondary} weight="regular" />
-                        </TouchableOpacity>
                     </View>
                 </View>
 
@@ -478,6 +472,75 @@ export default function SettingsScreen() {
                             </View>
                             <Text style={[styles.rowValue, { color: colors.textSecondary }]}>{APP_VERSION}</Text>
                         </View>
+                    </View>
+                </View>
+
+                {/* Developer Options Section (for testing) */}
+                <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Developer Options</Text>
+                    <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
+
+
+                        {/* View Notification Status */}
+                        <TouchableOpacity
+                            style={styles.row}
+                            onPress={async () => {
+                                const info = await getNotificationDebugInfo();
+                                const scheduledList = info.scheduledNotifications
+                                    .map((n: { id: string; title?: string }) => `• ${n.title || n.id}`)
+                                    .join('\n') || 'None';
+
+                                Alert.alert(
+                                    '🔔 Notification Status',
+                                    `Platform: ${info.platform}\n` +
+                                    `Is Web: ${info.isWeb}\n` +
+                                    `Is Physical Device: ${info.isDevice}\n` +
+                                    `Permission: ${info.permissionStatus}\n` +
+                                    `Scheduled Count: ${info.scheduledCount}\n\n` +
+                                    `Scheduled Notifications:\n${scheduledList}`,
+                                    [{ text: 'OK' }]
+                                );
+                            }}
+                        >
+                            <View style={styles.rowLeft}>
+                                <View style={[styles.iconContainer, { backgroundColor: '#007AFF' + '20' }]}>
+                                    <Bell size={20} color="#007AFF" weight="regular" />
+                                </View>
+                                <Text style={[styles.rowLabel, { color: colors.text }]}>View Notification Status</Text>
+                            </View>
+                            <CaretRight size={20} color={colors.textSecondary} weight="regular" />
+                        </TouchableOpacity>
+
+                        <View style={[styles.divider, { backgroundColor: colors.cardBorder }]} />
+
+                        {/* Reset Onboarding */}
+                        <TouchableOpacity
+                            style={styles.row}
+                            onPress={() => {
+                                Alert.alert(
+                                    'Reset Onboarding',
+                                    'This will reset the onboarding flow so you can test it again.',
+                                    [
+                                        { text: 'Cancel', style: 'cancel' },
+                                        {
+                                            text: 'Reset',
+                                            onPress: async () => {
+                                                await updateSettings({ hasCompletedOnboarding: false });
+                                                router.replace('/onboarding');
+                                            },
+                                        },
+                                    ]
+                                );
+                            }}
+                        >
+                            <View style={styles.rowLeft}>
+                                <View style={[styles.iconContainer, { backgroundColor: '#FF9500' + '20' }]}>
+                                    <ArrowCounterClockwise size={20} color="#FF9500" weight="regular" />
+                                </View>
+                                <Text style={[styles.rowLabel, { color: colors.text }]}>Reset Onboarding</Text>
+                            </View>
+                            <CaretRight size={20} color={colors.textSecondary} weight="regular" />
+                        </TouchableOpacity>
                     </View>
                 </View>
 
@@ -500,48 +563,43 @@ export default function SettingsScreen() {
                     <View style={[styles.avatarModalContent, { backgroundColor: colors.card }]}>
                         <Text style={[styles.modalTitle, { color: colors.text }]}>Choose Avatar</Text>
 
-                        <View style={styles.avatarOptionsContainer}>
-                            <TouchableOpacity
-                                style={styles.avatarOption}
-                                onPress={() => {
-                                    updateSettings({ userAvatar: 'avatar-male' });
-                                    setShowAvatarSelector(false);
-                                }}
-                            >
-                                <View style={[styles.avatarOptionImageContainer, { backgroundColor: colors.backgroundSecondary }]}>
-                                    <Image source={AVATAR_MALE} style={styles.avatarOptionImage} />
-                                </View>
-                                <Text style={[styles.avatarOptionLabel, { color: colors.text }]}>Male</Text>
-                                {settings.userAvatar === 'avatar-male' && (
-                                    <View style={[styles.selectedBadge, { backgroundColor: colors.accent }]}>
-                                        <CheckCircle size={12} color="#FFF" weight="fill" />
+                        <ScrollView
+                            style={styles.avatarScrollView}
+                            contentContainerStyle={styles.avatarOptionsContainer}
+                            showsVerticalScrollIndicator={false}
+                        >
+                            {AVATARS.map((avatarOption) => (
+                                <TouchableOpacity
+                                    key={avatarOption.id}
+                                    style={styles.avatarOption}
+                                    onPress={() => {
+                                        updateSettings({ userAvatar: avatarOption.id });
+                                        setShowAvatarSelector(false);
+                                    }}
+                                >
+                                    <View style={[
+                                        styles.avatarOptionImageContainer,
+                                        { backgroundColor: colors.backgroundSecondary },
+                                        settings.userAvatar === avatarOption.id && { borderColor: colors.accent, borderWidth: 2 }
+                                    ]}>
+                                        <Image source={avatarOption.source} style={styles.avatarOptionImage} />
                                     </View>
-                                )}
-                            </TouchableOpacity>
+                                    <Text style={[styles.avatarOptionLabel, { color: colors.text }]}>
+                                        {avatarOption.label}
+                                    </Text>
+                                    {settings.userAvatar === avatarOption.id && (
+                                        <View style={[styles.selectedBadge, { backgroundColor: colors.accent }]}>
+                                            <CheckCircle size={12} color="#FFF" weight="fill" />
+                                        </View>
+                                    )}
+                                </TouchableOpacity>
+                            ))}
 
-                            <TouchableOpacity
-                                style={styles.avatarOption}
-                                onPress={() => {
-                                    updateSettings({ userAvatar: 'avatar-female' });
-                                    setShowAvatarSelector(false);
-                                }}
-                            >
-                                <View style={[styles.avatarOptionImageContainer, { backgroundColor: colors.backgroundSecondary }]}>
-                                    <Image source={AVATAR_FEMALE} style={styles.avatarOptionImage} />
-                                </View>
-                                <Text style={[styles.avatarOptionLabel, { color: colors.text }]}>Female</Text>
-                                {settings.userAvatar === 'avatar-female' && (
-                                    <View style={[styles.selectedBadge, { backgroundColor: colors.accent }]}>
-                                        <CheckCircle size={12} color="#FFF" weight="fill" />
-                                    </View>
-                                )}
-                            </TouchableOpacity>
-
+                            {/* Emoji Option */}
                             <TouchableOpacity
                                 style={styles.avatarOption}
                                 onPress={() => {
                                     setShowAvatarSelector(false);
-                                    // Small delay to allow modal to close before opening emoji picker
                                     setTimeout(() => setShowEmojiPicker(true), 300);
                                 }}
                             >
@@ -550,7 +608,7 @@ export default function SettingsScreen() {
                                 </View>
                                 <Text style={[styles.avatarOptionLabel, { color: colors.text }]}>Emoji</Text>
                             </TouchableOpacity>
-                        </View>
+                        </ScrollView>
 
                         <TouchableOpacity
                             style={[styles.cancelButton, { backgroundColor: colors.backgroundSecondary }]}
@@ -850,11 +908,15 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         marginBottom: Spacing.lg,
     },
+    avatarScrollView: {
+        maxHeight: 300,
+        width: '100%',
+    },
     avatarOptionsContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
         gap: Spacing.md,
-        marginBottom: Spacing.xl,
+        paddingBottom: Spacing.md,
         flexWrap: 'wrap',
     },
     avatarOption: {

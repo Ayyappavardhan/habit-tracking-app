@@ -1,44 +1,57 @@
 /**
  * Onboarding - Welcome Screen
  * First screen users see. Focuses on value proposition.
+ * Always uses dark theme for consistent image blending.
  */
 
 import { BorderRadius, Spacing } from '@/constants/theme';
-import { useTheme } from '@/context/ThemeContext';
 import { router } from 'expo-router';
-import { ArrowRight, Lightning } from 'phosphor-react-native';
+import { ArrowRight } from 'phosphor-react-native';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function WelcomeScreen() {
-    const { colors } = useTheme();
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const IMAGE_SIZE = SCREEN_WIDTH * 0.75;
 
+// Force dark theme colors for onboarding (images have dark backgrounds)
+const ONBOARDING_COLORS = {
+    background: '#0D0D0D',
+    text: '#FFFFFF',
+    textSecondary: '#8E8E93',
+    accent: '#FFD700',
+};
+
+export default function WelcomeScreen() {
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <SafeAreaView style={[styles.container, { backgroundColor: ONBOARDING_COLORS.background }]}>
             <View style={styles.content}>
-                <View style={[styles.iconContainer, { backgroundColor: colors.accent + '20' }]}>
-                    <Lightning size={64} color={colors.accent} weight="fill" />
+                <View style={styles.imageWrapper}>
+                    <Image
+                        source={require('@/assets/images/onboarding/onboarding-welcome.png')}
+                        style={styles.image}
+                        resizeMode="contain"
+                    />
                 </View>
 
-                <Text style={[styles.title, { color: colors.text }]}>
+                <Text style={[styles.title, { color: ONBOARDING_COLORS.text }]}>
                     Build Better Habits
                 </Text>
 
-                <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                <Text style={[styles.subtitle, { color: ONBOARDING_COLORS.textSecondary }]}>
                     Track your progress, stay consistent, and reach your goals with a simple, privacy-focused habit tracker.
                 </Text>
             </View>
 
             <View style={styles.footer}>
                 <TouchableOpacity
-                    style={[styles.button, { backgroundColor: colors.accent }]}
-                    onPress={() => router.push('/onboarding/features')}
+                    style={[styles.button, { backgroundColor: ONBOARDING_COLORS.accent }]}
+                    onPress={() => router.push('/onboarding/pain-point')}
                 >
-                    <Text style={[styles.buttonText, { color: colors.background }]}>
+                    <Text style={[styles.buttonText, { color: ONBOARDING_COLORS.background }]}>
                         Get Started
                     </Text>
-                    <ArrowRight size={20} color={colors.background} weight="regular" />
+                    <ArrowRight size={20} color={ONBOARDING_COLORS.background} weight="regular" />
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -55,13 +68,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: Spacing.xl,
     },
-    iconContainer: {
-        width: 120,
-        height: 120,
-        borderRadius: BorderRadius.xl,
-        justifyContent: 'center',
+    imageWrapper: {
+        width: IMAGE_SIZE,
+        height: IMAGE_SIZE,
+        marginBottom: Spacing.lg,
         alignItems: 'center',
-        marginBottom: Spacing.xl,
+        justifyContent: 'center',
+    },
+    image: {
+        width: '100%',
+        height: '100%',
     },
     title: {
         fontSize: 32,

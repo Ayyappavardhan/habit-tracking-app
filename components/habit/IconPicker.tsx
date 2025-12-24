@@ -318,6 +318,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: GRID_GAP,
+        justifyContent: 'center',
     },
     iconButton: {
         width: ICON_CONTAINER_SIZE,

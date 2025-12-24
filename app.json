@@ -1,15 +1,16 @@
 {
   "expo": {
-    "name": "habit-tracking-app",
-    "slug": "habit-tracking-app",
+    "name": "PixelStride",
+    "slug": "pixel-stride",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "habittrackingapp",
+    "scheme": "pixelstride",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.habittracker.app"
     },
     "android": {
       "package": "com.habittracker.app",
@@ -26,8 +27,8 @@
       "output": "static",
       "bundler": "metro",
       "favicon": "./assets/images/icon.png",
-      "name": "Habit Tracker",
-      "shortName": "Habits"
+      "name": "PixelStride",
+      "shortName": "PixelStride"
     },
     "plugins": [
       "expo-router",
@@ -35,16 +36,17 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/Gemini_Generated_Image_2zu76c2zu76c2zu7.png",
+          "image": "./assets/images/icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#000000",
           "dark": {
-            "image": "./assets/images/Gemini_Generated_Image_2zu76c2zu76c2zu7.png",
+            "image": "./assets/images/icon.png",
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "./plugins/withAndroidExclusion.js"
     ],
     "experiments": {
       "typedRoutes": true,

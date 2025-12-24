@@ -50,6 +50,7 @@ export default function AddScreen() {
     const [notificationEnabled, setNotificationEnabled] = useState(false);
     // Use the default notification time from settings
     const [notificationTime, setNotificationTime] = useState(settings.defaultNotificationTime);
+    const [notificationDay, setNotificationDay] = useState<number | undefined>(undefined); // For weekly: 1-7, for monthly: 1-31
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Filter out 'custom' from the category list
@@ -142,6 +143,7 @@ export default function AddScreen() {
                 daysPerWeek: frequency === 'daily' ? 7 : frequency === 'weekly' ? 1 : 1,
                 notificationEnabled,
                 notificationTime: notificationEnabled ? notificationTime : undefined,
+                notificationDay: notificationEnabled ? notificationDay : undefined,
             });
 
             Alert.alert('Success! 🎉', `"${name}" has been added to your habits.`, [
@@ -319,8 +321,11 @@ export default function AddScreen() {
                     <NotificationPicker
                         enabled={notificationEnabled}
                         time={notificationTime}
+                        frequency={frequency}
+                        day={notificationDay}
                         onToggle={setNotificationEnabled}
                         onTimeChange={setNotificationTime}
+                        onDayChange={setNotificationDay}
                     />
 
                     {/* Create Button */}

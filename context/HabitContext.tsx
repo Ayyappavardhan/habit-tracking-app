@@ -130,7 +130,8 @@ export function HabitProvider({ children }: { children: ReactNode }) {
                     habitData.name,
                     habitData.icon,
                     habitData.notificationTime,
-                    habitData.frequency
+                    habitData.frequency,
+                    habitData.notificationDay
                 );
                 if (result) notificationId = result;
             }
@@ -165,10 +166,14 @@ export function HabitProvider({ children }: { children: ReactNode }) {
             updates.notificationTime !== currentHabit.notificationTime;
         const notificationEnabledChanged = updates.notificationEnabled !== undefined &&
             updates.notificationEnabled !== currentHabit.notificationEnabled;
+        const notificationDayChanged = updates.notificationDay !== undefined &&
+            updates.notificationDay !== currentHabit.notificationDay;
+        const frequencyChanged = updates.frequency !== undefined &&
+            updates.frequency !== currentHabit.frequency;
 
         let newNotificationId = currentHabit.notificationId;
 
-        if (notificationTimeChanged || notificationEnabledChanged) {
+        if (notificationTimeChanged || notificationEnabledChanged || notificationDayChanged || frequencyChanged) {
             // Cancel old notification if exists
             if (currentHabit.notificationId) {
                 await cancelNotification(currentHabit.notificationId);
@@ -187,7 +192,8 @@ export function HabitProvider({ children }: { children: ReactNode }) {
                         updates.name ?? currentHabit.name,
                         updates.icon ?? currentHabit.icon,
                         newTime,
-                        updates.frequency ?? currentHabit.frequency
+                        updates.frequency ?? currentHabit.frequency,
+                        updates.notificationDay ?? currentHabit.notificationDay
                     );
                     if (result) newNotificationId = result;
                 }

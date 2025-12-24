@@ -35,6 +35,7 @@ export interface Habit {
     completedDates: Record<string, number>;
     notificationEnabled: boolean;
     notificationTime?: string;
+    notificationDay?: number; // For weekly: 1-7 (Sun-Sat), for monthly: 1-31
     notificationId?: string;
     createdAt: string;
 }

@@ -6,6 +6,7 @@
 import { BorderRadius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { Habit } from '@/types/habit';
+import * as PhosphorIcons from 'phosphor-react-native';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -31,6 +32,23 @@ function getStatusColors(accent: string, isDark: boolean) {
         poor: '#FF453A',
     };
 }
+
+// Dynamic icon rendering helper - handles both Phosphor icons and emojis
+const renderHabitIcon = (iconName: string, size: number, color: string) => {
+    // Check if it's likely an emoji (short string, usually 1-2 chars)
+    if (iconName.length <= 2) {
+        return <Text style={{ fontSize: size }}>{iconName}</Text>;
+    }
+
+    // Try to render as Phosphor icon
+    const IconComponent = (PhosphorIcons as any)[iconName];
+    if (IconComponent) {
+        return <IconComponent size={size} color={color} weight="regular" />;
+    }
+
+    // Fallback to Star icon if not found
+    return <PhosphorIcons.Star size={size} color={color} weight="regular" />;
+};
 
 export default function HabitPerformanceCard({ data, period }: HabitPerformanceCardProps) {
     const { colors, isDark } = useTheme();
@@ -58,7 +76,9 @@ export default function HabitPerformanceCard({ data, period }: HabitPerformanceC
                 {data.slice(0, 5).map((item, index) => (
                     <View key={item.habit.id} style={styles.habitRow}>
                         <View style={styles.habitInfo}>
-                            <Text style={styles.habitIcon}>{item.habit.icon}</Text>
+                            <View style={styles.habitIconContainer}>
+                                {renderHabitIcon(item.habit.icon, 20, colors.textSecondary)}
+                            </View>
                             <View style={styles.habitTextContainer}>
                                 <Text
                                     style={[styles.habitName, { color: colors.text }]}
@@ -137,8 +157,11 @@ const styles = StyleSheet.create({
         flex: 1,
         marginRight: Spacing.md,
     },
-    habitIcon: {
-        fontSize: 20,
+    habitIconContainer: {
+        width: 28,
+        height: 28,
+        justifyContent: 'center',
+        alignItems: 'center',
         marginRight: Spacing.sm,
     },
     habitTextContainer: {

@@ -49,7 +49,6 @@ if (!isWeb) {
     if (Notifications) {
         Notifications.setNotificationHandler({
             handleNotification: async () => ({
-                shouldShowAlert: true,
                 shouldPlaySound: true,
                 shouldSetBadge: false,
                 shouldShowBanner: true,
@@ -107,14 +106,81 @@ export async function requestNotificationPermissions(): Promise<boolean> {
 }
 
 /**
- * Schedule a daily habit reminder
+ * Schedule monthly notifications for the next 3 months
+ * Since expo-notifications doesn't have a native monthly repeat trigger,
+ * we schedule individual notifications for each upcoming month.
+ * This function should be called on app launch to refresh the schedule.
+ */
+async function scheduleMonthlyNotifications(
+    habitId: string,
+    habitName: string,
+    habitEmoji: string,
+    hours: number,
+    minutes: number,
+    dayOfMonth: number, // 1-31
+    Notifications: NotificationsModule
+): Promise<string | null> {
+    const notificationIds: string[] = [];
+    const now = new Date();
+
+    // Schedule for the next 3 months
+    for (let i = 0; i <= 3; i++) {
+        // Calculate the target year and month
+        let targetYear = now.getFullYear();
+        let targetMonth = now.getMonth() + i;
+
+        // Adjust for year rollover
+        if (targetMonth > 11) {
+            targetYear += Math.floor(targetMonth / 12);
+            targetMonth = targetMonth % 12;
+        }
+
+        // Get the number of days in the target month (day 0 of next month gives last day of current)
+        const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+
+        // The actual day to schedule is the lesser of the user's selected day or the last day of the month
+        // Example: User chose 31st. Feb has 28 days. Math.min(31, 28) = 28.
+        const actualDay = Math.min(dayOfMonth, daysInMonth);
+
+        const targetDate = new Date(targetYear, targetMonth, actualDay, hours, minutes, 0, 0);
+
+        // Only schedule if the date is in the future
+        if (targetDate > now) {
+            try {
+                const notificationId = await Notifications.scheduleNotificationAsync({
+                    content: {
+                        title: `${habitEmoji} Monthly reminder: ${habitName}!`,
+                        body: "Don't forget your monthly habit!",
+                        data: { habitId, isMonthly: true },
+                        sound: true,
+                    },
+                    trigger: {
+                        type: Notifications.SchedulableTriggerInputTypes.DATE,
+                        date: targetDate,
+                    },
+                });
+                notificationIds.push(notificationId);
+                console.log(`Scheduled monthly notification for ${targetDate.toDateString()}: ${notificationId}`);
+            } catch (error) {
+                console.error(`Error scheduling monthly notification for month ${i}:`, error);
+            }
+        }
+    }
+
+    // Return the first notification ID for tracking (or null if none scheduled)
+    return notificationIds.length > 0 ? notificationIds[0] : null;
+}
+
+/**
+ * Schedule a habit reminder
  */
 export async function scheduleHabitReminder(
     habitId: string,
     habitName: string,
     habitEmoji: string,
     time: string, // HH:MM format
-    frequency: FrequencyType
+    frequency: FrequencyType,
+    day?: number // For weekly: 1-7 (Sun-Sat), for monthly: 1-31
 ): Promise<string | null> {
     if (isWeb) {
         console.log('Notifications not supported on web');
@@ -139,22 +205,18 @@ export async function scheduleHabitReminder(
                 minute: minutes,
             };
         } else if (frequency === 'weekly') {
-            // For weekly, we'll default to the current day
+            // Weekly: Use user-selected weekday or default to Sunday (1)
+            const weekday = day || 1; // 1=Sunday, 7=Saturday
             trigger = {
                 type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
-                weekday: new Date().getDay() + 1, // 1-7 for Sunday-Saturday
+                weekday: weekday,
                 hour: hours,
                 minute: minutes,
             };
         } else {
-            // Monthly - schedule for the same date next month
-            const nextDate = new Date();
-            nextDate.setMonth(nextDate.getMonth() + 1);
-            nextDate.setHours(hours, minutes, 0, 0);
-            trigger = {
-                type: Notifications.SchedulableTriggerInputTypes.DATE,
-                date: nextDate,
-            };
+            // Monthly: Schedule notifications for the next 3 months on the selected day
+            const dayOfMonth = day || 1; // Default to 1st of month
+            return await scheduleMonthlyNotifications(habitId, habitName, habitEmoji, hours, minutes, dayOfMonth, Notifications);
         }
 
         const notificationId = await Notifications.scheduleNotificationAsync({
@@ -280,7 +342,8 @@ export async function rescheduleAllHabitNotifications(
                 habit.name,
                 habit.icon,
                 habit.notificationTime,
-                habit.frequency
+                habit.frequency,
+                habit.notificationDay
             );
 
             if (notificationId) {
@@ -354,4 +417,61 @@ export async function cancelAppDailyReminder(): Promise<void> {
         // Ignore error if notification doesn't exist
         console.log('No app daily reminder to cancel');
     }
+}
+
+
+
+/**
+ * Get debug info about the current notification status
+ */
+export async function getNotificationDebugInfo(): Promise<{
+    platform: string;
+    isWeb: boolean;
+    isDevice: boolean;
+    permissionStatus: string;
+    scheduledCount: number;
+    scheduledNotifications: Array<{ id: string; title?: string; trigger?: unknown }>;
+}> {
+    const platform = Platform.OS;
+
+    if (isWeb) {
+        return {
+            platform,
+            isWeb: true,
+            isDevice: false,
+            permissionStatus: 'not_available',
+            scheduledCount: 0,
+            scheduledNotifications: [],
+        };
+    }
+
+    const Device = getDevice();
+    const Notifications = getNotifications();
+
+    if (!Device || !Notifications) {
+        return {
+            platform,
+            isWeb: false,
+            isDevice: false,
+            permissionStatus: 'not_available',
+            scheduledCount: 0,
+            scheduledNotifications: [],
+        };
+    }
+
+    const { status } = await Notifications.getPermissionsAsync();
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+
+    return {
+        platform,
+        isWeb: false,
+        isDevice: Device.isDevice,
+        permissionStatus: status,
+        scheduledCount: scheduled.length,
+        scheduledNotifications: scheduled.map((n) => ({
+            id: n.identifier,
+            title: n.content.title || undefined,
+            trigger: n.trigger,
+        })),
+    };
 }

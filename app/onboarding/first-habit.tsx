@@ -1,13 +1,13 @@
 /**
  * Onboarding - First Habit Screen
  * User creates their first habit.
+ * Always uses dark theme for consistent onboarding experience.
  */
 
 import { DEFAULT_ICON, PopularHabit, popularHabitIcons } from '@/constants/iconData';
 import { BorderRadius, Spacing } from '@/constants/theme';
 import { useHabits } from '@/context/HabitContext';
 import { useSettings } from '@/context/SettingsContext';
-import { useTheme } from '@/context/ThemeContext';
 import { router } from 'expo-router';
 import * as PhosphorIcons from 'phosphor-react-native';
 import { ArrowLeft, CheckCircle } from 'phosphor-react-native';
@@ -27,10 +27,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 // Use popular habits from iconData
 const POPULAR_HABITS = popularHabitIcons.slice(0, 6);
 
+// Force dark theme colors for onboarding
+const ONBOARDING_COLORS = {
+    background: '#0D0D0D',
+    text: '#FFFFFF',
+    textSecondary: '#8E8E93',
+    textMuted: '#636366',
+    accent: '#FFD700',
+    card: '#1C1C1E',
+    cardBorder: '#2C2C2E',
+};
+
 export default function FirstHabitScreen() {
     const { addHabit } = useHabits();
     const { settings } = useSettings();
-    const { colors, isDark } = useTheme();
     const [habitName, setHabitName] = useState('');
     const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
     const [selectedHabit, setSelectedHabit] = useState<PopularHabit | null>(null);
@@ -81,7 +91,7 @@ export default function FirstHabitScreen() {
     };
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <SafeAreaView style={[styles.container, { backgroundColor: ONBOARDING_COLORS.background }]}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{ flex: 1 }}
@@ -89,26 +99,26 @@ export default function FirstHabitScreen() {
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     <View style={styles.header}>
                         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                            <ArrowLeft size={24} color={colors.text} weight="regular" />
+                            <ArrowLeft size={24} color={ONBOARDING_COLORS.text} weight="regular" />
                         </TouchableOpacity>
                     </View>
 
                     <View style={styles.content}>
-                        <Text style={[styles.title, { color: colors.text }]}>
+                        <Text style={[styles.title, { color: ONBOARDING_COLORS.text }]}>
                             Start with one habit
                         </Text>
-                        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                        <Text style={[styles.subtitle, { color: ONBOARDING_COLORS.textSecondary }]}>
                             What's the main thing you want to work on?
                         </Text>
 
                         {/* Input */}
                         <View style={styles.inputContainer}>
-                            <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>I want to...</Text>
+                            <Text style={[styles.inputLabel, { color: ONBOARDING_COLORS.textSecondary }]}>I want to...</Text>
                             <TextInput
                                 style={[styles.textInput, {
-                                    backgroundColor: colors.card,
-                                    color: colors.text,
-                                    borderColor: colors.cardBorder
+                                    backgroundColor: ONBOARDING_COLORS.card,
+                                    color: ONBOARDING_COLORS.text,
+                                    borderColor: ONBOARDING_COLORS.cardBorder
                                 }]}
                                 value={habitName}
                                 onChangeText={(text) => {
@@ -116,13 +126,13 @@ export default function FirstHabitScreen() {
                                     setSelectedSuggestion(null);
                                 }}
                                 placeholder="e.g., Drink more water"
-                                placeholderTextColor={colors.textMuted}
+                                placeholderTextColor={ONBOARDING_COLORS.textMuted}
                                 maxLength={50}
                             />
                         </View>
 
                         {/* Suggestions */}
-                        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+                        <Text style={[styles.sectionTitle, { color: ONBOARDING_COLORS.textSecondary }]}>
                             Suggestions
                         </Text>
                         <View style={styles.suggestionsGrid}>
@@ -134,24 +144,24 @@ export default function FirstHabitScreen() {
                                         style={[
                                             styles.suggestionCard,
                                             {
-                                                backgroundColor: colors.card,
-                                                borderColor: isSelected ? colors.accent : colors.cardBorder
+                                                backgroundColor: ONBOARDING_COLORS.card,
+                                                borderColor: isSelected ? ONBOARDING_COLORS.accent : ONBOARDING_COLORS.cardBorder
                                             },
-                                            isSelected && { backgroundColor: colors.accent + '10' }
+                                            isSelected && { backgroundColor: ONBOARDING_COLORS.accent + '10' }
                                         ]}
                                         onPress={() => handleSelectSuggestion(habit)}
                                     >
                                         <View style={[
                                             styles.suggestionIconContainer,
-                                            { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' },
-                                            isSelected && { backgroundColor: colors.accent + '20' }
+                                            { backgroundColor: 'rgba(255,255,255,0.08)' },
+                                            isSelected && { backgroundColor: ONBOARDING_COLORS.accent + '20' }
                                         ]}>
-                                            {renderIcon(habit.icon, 24, isSelected ? colors.accent : colors.textSecondary)}
+                                            {renderIcon(habit.icon, 24, isSelected ? ONBOARDING_COLORS.accent : ONBOARDING_COLORS.textSecondary)}
                                         </View>
                                         <Text style={[
                                             styles.suggestionText,
-                                            { color: colors.text },
-                                            isSelected && { color: colors.accent, fontWeight: '600' }
+                                            { color: ONBOARDING_COLORS.text },
+                                            isSelected && { color: ONBOARDING_COLORS.accent, fontWeight: '600' }
                                         ]}>
                                             {habit.name}
                                         </Text>
@@ -166,16 +176,16 @@ export default function FirstHabitScreen() {
                     <TouchableOpacity
                         style={[
                             styles.button,
-                            { backgroundColor: colors.accent },
+                            { backgroundColor: ONBOARDING_COLORS.accent },
                             !habitName.trim() && { opacity: 0.5 }
                         ]}
                         onPress={handleStartTracking}
                         disabled={!habitName.trim()}
                     >
-                        <Text style={[styles.buttonText, { color: colors.background }]}>
+                        <Text style={[styles.buttonText, { color: ONBOARDING_COLORS.background }]}>
                             Start Tracking
                         </Text>
-                        <CheckCircle size={20} color={colors.background} weight="fill" />
+                        <CheckCircle size={20} color={ONBOARDING_COLORS.background} weight="fill" />
                     </TouchableOpacity>
                 </View>
             </KeyboardAvoidingView>

@@ -1,34 +1,27 @@
 /**
- * Onboarding - Features Screen
- * Highlights streaks and progress tracking.
- * Always uses dark theme for consistent image blending.
+ * Onboarding - Solution Flexibility Screen
+ * Highlights flexibility and forgiveness.
  */
 
 import { BorderRadius, Spacing } from '@/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { ArrowLeft, ArrowRight, ChartLineUp, Flame } from 'phosphor-react-native';
+import { ArrowLeft, ArrowRight } from 'phosphor-react-native';
 import React from 'react';
 import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const IMAGE_SIZE = SCREEN_WIDTH * 0.7;
+const IMAGE_SIZE = SCREEN_WIDTH * 0.8;
 
-// Force dark theme colors for onboarding (images have dark backgrounds)
 const ONBOARDING_COLORS = {
-    background: '#0D0D0D',
+    background: '#000000',
     text: '#FFFFFF',
     textSecondary: '#8E8E93',
     accent: '#FFD700',
-    card: '#1C1C1E',
-    cardBorder: '#2C2C2E',
-    // Gradient colors for masking
-    gradientStart: '#0D0D0D',
-    gradientEnd: 'transparent',
 };
 
-export default function FeaturesScreen() {
+export default function SolutionFlexibilityScreen() {
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: ONBOARDING_COLORS.background }]}>
             <View style={styles.header}>
@@ -40,9 +33,9 @@ export default function FeaturesScreen() {
             <View style={styles.content}>
                 <View style={styles.imageWrapper}>
                     <Image
-                        source={require('@/assets/images/onboarding/onboarding-features.png')}
+                        source={require('@/assets/images/onboarding/onboarding-solution-flexibility.png')}
                         style={styles.image}
-                        resizeMode="cover"
+                        resizeMode="contain"
                     />
 
                     {/* Gradient Masks for Seamless Blending */}
@@ -73,32 +66,21 @@ export default function FeaturesScreen() {
                 </View>
 
                 <Text style={[styles.title, { color: ONBOARDING_COLORS.text }]}>
-                    Track Your Progress
+                    Life Happens
                 </Text>
 
                 <Text style={[styles.subtitle, { color: ONBOARDING_COLORS.textSecondary }]}>
-                    Consistency is key. Track your daily streaks, visualize your progress, and stay motivated to reach your goals.
+                    Missed a day? No problem. Our flexible scheduling keeps your streak alive so you never feel discouraged.
                 </Text>
-
-                <View style={styles.featureList}>
-                    <View style={[styles.featureItem, { backgroundColor: ONBOARDING_COLORS.card, borderColor: ONBOARDING_COLORS.cardBorder }]}>
-                        <Flame size={24} color="#FF9500" weight="fill" />
-                        <Text style={[styles.featureText, { color: ONBOARDING_COLORS.text }]}>Track streaks</Text>
-                    </View>
-                    <View style={[styles.featureItem, { backgroundColor: ONBOARDING_COLORS.card, borderColor: ONBOARDING_COLORS.cardBorder }]}>
-                        <ChartLineUp size={24} color="#34C759" weight="regular" />
-                        <Text style={[styles.featureText, { color: ONBOARDING_COLORS.text }]}>View analytics</Text>
-                    </View>
-                </View>
             </View>
 
             <View style={styles.footer}>
                 <TouchableOpacity
                     style={[styles.button, { backgroundColor: ONBOARDING_COLORS.accent }]}
-                    onPress={() => router.push('/onboarding/privacy')}
+                    onPress={() => router.push('/onboarding/features')}
                 >
                     <Text style={[styles.buttonText, { color: ONBOARDING_COLORS.background }]}>
-                        Next
+                        See Features
                     </Text>
                     <ArrowRight size={20} color={ONBOARDING_COLORS.background} weight="regular" />
                 </TouchableOpacity>
@@ -126,24 +108,22 @@ const styles = StyleSheet.create({
     },
     imageWrapper: {
         width: IMAGE_SIZE,
-        height: IMAGE_SIZE * 2, // Adjusted for vertical phone screenshot aspect ratio (approx 9:18)
+        height: IMAGE_SIZE,
         marginBottom: Spacing.lg,
         alignItems: 'center',
         justifyContent: 'center',
-        position: 'relative', // Ensure gradients are positioned relative to this
-        overflow: 'hidden', // Ensure gradients don't spill out if we change sizing
+        position: 'relative',
     },
     image: {
         width: '100%',
         height: '100%',
     },
-    // Gradient definitions for masking
     gradientTop: {
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
-        height: '30%', // Increased from 40 for stronger masking
+        height: '30%',
         zIndex: 10,
     },
     gradientBottom: {
@@ -151,7 +131,7 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        height: '30%', // Increased from 40 for stronger masking
+        height: '30%',
         zIndex: 10,
     },
     gradientLeft: {
@@ -159,7 +139,7 @@ const styles = StyleSheet.create({
         top: 0,
         bottom: 0,
         left: 0,
-        width: '30%', // Increased from 40 for stronger masking
+        width: '40%',
         zIndex: 10,
     },
     gradientRight: {
@@ -167,7 +147,7 @@ const styles = StyleSheet.create({
         top: 0,
         bottom: 0,
         right: 0,
-        width: '30%', // Increased from 40 for stronger masking
+        width: '40%',
         zIndex: 10,
     },
     title: {
@@ -180,24 +160,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign: 'center',
         lineHeight: 24,
-        marginBottom: Spacing.xl,
-    },
-    featureList: {
-        flexDirection: 'row',
-        gap: Spacing.md,
-    },
-    featureItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: Spacing.sm,
-        paddingVertical: Spacing.sm,
-        paddingHorizontal: Spacing.md,
-        borderRadius: BorderRadius.full,
-        borderWidth: 1,
-    },
-    featureText: {
-        fontSize: 16,
-        fontWeight: '500',
     },
     footer: {
         padding: Spacing.xl,

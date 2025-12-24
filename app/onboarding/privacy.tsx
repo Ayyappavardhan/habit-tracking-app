@@ -1,58 +1,74 @@
 /**
  * Onboarding - Privacy Screen
  * Emphasizes no data collection and local storage.
+ * Always uses dark theme for consistent image blending.
  */
 
 import { BorderRadius, Spacing } from '@/constants/theme';
-import { useTheme } from '@/context/ThemeContext';
 import { router } from 'expo-router';
-import { ArrowLeft, ArrowRight, DeviceMobile, ShieldCheck, UserMinus } from 'phosphor-react-native';
+import { ArrowLeft, ArrowRight, DeviceMobile, UserMinus } from 'phosphor-react-native';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function PrivacyScreen() {
-    const { colors } = useTheme();
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const IMAGE_SIZE = SCREEN_WIDTH * 0.6;
 
+// Force dark theme colors for onboarding (images have dark backgrounds)
+const ONBOARDING_COLORS = {
+    background: '#0D0D0D',
+    text: '#FFFFFF',
+    textSecondary: '#8E8E93',
+    textMuted: '#636366',
+    accent: '#FFD700',
+    card: '#1C1C1E',
+    cardBorder: '#2C2C2E',
+};
+
+export default function PrivacyScreen() {
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <SafeAreaView style={[styles.container, { backgroundColor: ONBOARDING_COLORS.background }]}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <ArrowLeft size={24} color={colors.text} weight="regular" />
+                    <ArrowLeft size={24} color={ONBOARDING_COLORS.text} weight="regular" />
                 </TouchableOpacity>
             </View>
 
             <View style={styles.content}>
-                <View style={[styles.iconContainer, { backgroundColor: colors.accent + '20' }]}>
-                    <ShieldCheck size={64} color={colors.accent} weight="regular" />
+                <View style={styles.imageWrapper}>
+                    <Image
+                        source={require('@/assets/images/onboarding/onboarding-privacy.png')}
+                        style={styles.image}
+                        resizeMode="contain"
+                    />
                 </View>
 
-                <Text style={[styles.title, { color: colors.text }]}>
+                <Text style={[styles.title, { color: ONBOARDING_COLORS.text }]}>
                     Privacy First
                 </Text>
 
-                <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                <Text style={[styles.subtitle, { color: ONBOARDING_COLORS.textSecondary }]}>
                     Your data stays on your device. No sign-up, no cloud syncing, and absolutely no tracking.
                 </Text>
 
-                <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
+                <View style={[styles.infoCard, { backgroundColor: ONBOARDING_COLORS.card, borderColor: ONBOARDING_COLORS.cardBorder }]}>
                     <View style={styles.infoItem}>
-                        <DeviceMobile size={24} color={colors.text} weight="regular" />
+                        <DeviceMobile size={24} color={ONBOARDING_COLORS.accent} weight="fill" />
                         <View style={styles.infoTextContainer}>
-                            <Text style={[styles.infoTitle, { color: colors.text }]}>Local Storage Only</Text>
-                            <Text style={[styles.infoDesc, { color: colors.textMuted }]}>
+                            <Text style={[styles.infoTitle, { color: ONBOARDING_COLORS.text }]}>Local Storage Only</Text>
+                            <Text style={[styles.infoDesc, { color: ONBOARDING_COLORS.textMuted }]}>
                                 All habits and progress are stored locally on your phone.
                             </Text>
                         </View>
                     </View>
 
-                    <View style={[styles.divider, { backgroundColor: colors.cardBorder }]} />
+                    <View style={[styles.divider, { backgroundColor: ONBOARDING_COLORS.cardBorder }]} />
 
                     <View style={styles.infoItem}>
-                        <UserMinus size={24} color={colors.text} weight="regular" />
+                        <UserMinus size={24} color={ONBOARDING_COLORS.accent} weight="fill" />
                         <View style={styles.infoTextContainer}>
-                            <Text style={[styles.infoTitle, { color: colors.text }]}>No Account Needed</Text>
-                            <Text style={[styles.infoDesc, { color: colors.textMuted }]}>
+                            <Text style={[styles.infoTitle, { color: ONBOARDING_COLORS.text }]}>No Account Needed</Text>
+                            <Text style={[styles.infoDesc, { color: ONBOARDING_COLORS.textMuted }]}>
                                 Start using the app instantly without creating an account.
                             </Text>
                         </View>
@@ -62,13 +78,13 @@ export default function PrivacyScreen() {
 
             <View style={styles.footer}>
                 <TouchableOpacity
-                    style={[styles.button, { backgroundColor: colors.accent }]}
+                    style={[styles.button, { backgroundColor: ONBOARDING_COLORS.accent }]}
                     onPress={() => router.push('/onboarding/profile')}
                 >
-                    <Text style={[styles.buttonText, { color: colors.background }]}>
+                    <Text style={[styles.buttonText, { color: ONBOARDING_COLORS.background }]}>
                         Next
                     </Text>
-                    <ArrowRight size={20} color={colors.background} weight="regular" />
+                    <ArrowRight size={20} color={ONBOARDING_COLORS.background} weight="regular" />
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -92,13 +108,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: Spacing.xl,
     },
-    iconContainer: {
-        width: 120,
-        height: 120,
-        borderRadius: BorderRadius.xl,
-        justifyContent: 'center',
+    imageWrapper: {
+        width: IMAGE_SIZE,
+        height: IMAGE_SIZE,
+        marginBottom: Spacing.lg,
         alignItems: 'center',
-        marginBottom: Spacing.xl,
+        justifyContent: 'center',
+    },
+    image: {
+        width: '100%',
+        height: '100%',
     },
     title: {
         fontSize: 32,
@@ -110,7 +129,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign: 'center',
         lineHeight: 24,
-        marginBottom: Spacing.xl * 2,
+        marginBottom: Spacing.xl,
     },
     infoCard: {
         width: '100%',

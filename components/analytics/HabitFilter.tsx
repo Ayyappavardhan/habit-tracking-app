@@ -62,7 +62,10 @@ export default function HabitFilter({ habits, selectedHabitId, onSelect }: Habit
                         <Text style={[styles.selectedText, { color: colors.text }]}>{selectedHabit.name}</Text>
                     </View>
                 ) : (
-                    <Text style={[styles.selectedText, { color: colors.text }]}>All Habits</Text>
+                    <View style={styles.selectedContent}>
+                        <PhosphorIcons.SquaresFour size={16} color={colors.text} weight="fill" />
+                        <Text style={[styles.selectedText, { color: colors.text }]}>All Habits</Text>
+                    </View>
                 )}
 
                 <Ionicons name="chevron-down" size={16} color={colors.text} />
@@ -97,7 +100,11 @@ export default function HabitFilter({ habits, selectedHabitId, onSelect }: Habit
                                 onPress={() => handleSelect(null)}
                             >
                                 <View style={styles.iconContainer}>
-                                    <Text style={styles.emojiIcon}>📊</Text>
+                                    <PhosphorIcons.SquaresFour
+                                        size={20}
+                                        color={!selectedHabitId ? colors.accent : colors.text}
+                                        weight="fill"
+                                    />
                                 </View>
                                 <Text style={[
                                     styles.optionText,
